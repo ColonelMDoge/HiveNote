@@ -57,6 +57,7 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 ### 7. Roles and Responsibilities
 
 | Role | Description | Assigned To |
+|------|-------------|-------------|
 | **Product Owner** | Oversees and defines the vision of project | ColonelMDoge|
 | **Development Team** | Implements the features | ColonelMDoge |
 | **Testers** | Tests the app for any issues | QA Team |
@@ -65,7 +66,7 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 
 ### 8. Tools and Technologies
 - **Language:** Java
-- **Database:** MySQL on 
+- **Database:** MySQL on Oracle Cloud Infrastructure DB 
 - **Version Control:** GitHub
 - **Testing:** 'java.util.Logging'
 - **Deployment:** Oracle Cloud Infrastructure Instance
@@ -84,7 +85,7 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 
 ---
 
-### 10. Success Criteraira
+### 10. Success Criteria
 - Discord application is live and functional.
 - Authentication works.
 - Desired code coverage is achieved.
