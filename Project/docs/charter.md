@@ -64,7 +64,7 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 
 ---
 
-### 8. Tools and Technologies
+### 8. Tools, Technologies, and Dependencies
 - **Language:** Java
 - **Database:** MySQL on Oracle Cloud Infrastructure DB 
 - **Version Control:** GitHub
@@ -91,6 +91,24 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 - Desired code coverage is achieved.
 - Documentation is complete.
 - Database and respective core functions work.
+
+---
+
+### 11. Budget
+- There are currently no anticipated costs for this project.
+
+---
+
+### 12. Approvals
+- Project Charter Approval Date:
+- Project Manager Acknowledgement: 
+
+---
+
+### 13. Revision History
+
+| Change Made By  | Date Change Made | Details of Change | Approved By | Approval Date |
+|-----------------|------------------|-------------------|-------------|---------------|
 
 ---
 
