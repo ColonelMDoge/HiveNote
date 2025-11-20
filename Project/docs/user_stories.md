@@ -6,7 +6,7 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 
 ---
 
-## ### 1. User Management
+## 1. User Management
 
 ### User Story 1.1 - Identification
 **As a** user,
@@ -32,7 +32,7 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 
 ---
 
-## ### 2. Notes Management
+## 2. Notes Management
 
 ### User Story 2.1 - Uploading Notes
 **As a** user,
@@ -60,7 +60,7 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 
 ---
 
-## ### 3. User Experience and AI Usage
+## 3. User Experience and AI Usage
 
 ### User Story 3.1 - Discord Bot Interaction
 **As a** user,
@@ -82,7 +82,7 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 
 ---
 
-## ### 4. Database Integration
+## 4. Database Integration
 
 ### User Story 4.1 – Persist Data
 **As a** user,
@@ -101,12 +101,12 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 **so that** the displayed data is always current.
 
 **Acceptance Criteria:**
-- Discord Bot triggers accurate SQL operations (INSERT, UPDATE, DELETE).
+- Discord Bot triggers accurate SQL operations.
 - Notes reload after each operation to display the latest state.
 
 ---
 
-## ### 5. Testing & Quality Assurance
+## 5. Testing & Quality Assurance
 
 ### User Story 5.1 – Functional Tests
 **As a** tester,
