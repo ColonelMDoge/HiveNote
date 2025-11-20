@@ -15,7 +15,7 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 
 ### 3. Project Objectives
 - Implement **user registration**, **upload**, **delete**, and **HiveMind AI** functionality.
-- Implement the core features: 'attachToDB()', 'upload()', 'delete()', 'retrieveBasedOnTags()', "summarize()' 
+- Implement the core features: `createDB()`, `addUserToDB()`, `uploadNotes()`, `deleteMyNotes()`, `retrieveNotes()`, `generateSummary()`, etc. 
 - Integrate **logging** with **code coverage** to ensure thorough testing.
 
 ---
@@ -37,7 +37,7 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 ---
 
 ### 5. Project Deliverables
-- 'charter.md' - Project Charter
+- `charter.md` - Project Charter
 - Functional requirements and documentation
 - Deployment of SQL table
 - AI integration 
@@ -109,10 +109,11 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 
 | Change Made By  | Date Change Made | Details of Change | Approved By | Approval Date |
 |-----------------|------------------|-------------------|-------------|---------------|
+| ColonelMDoge    | 11/20/2025       | Renamed functions and formatted strings correctly | PNC Logistics | 11/20/2025 |
 
 ---
 
-**File:** 'Project/docs/charter.md'
+**File:** `Project/docs/charter.md`
 **Version:** 1.0
 **Date:** 2025/11/19
 **Team:** PNC Logistics
