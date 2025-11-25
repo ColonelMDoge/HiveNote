@@ -1,5 +1,6 @@
 package discord;
 
+import gemini.AISummaryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
@@ -37,6 +38,7 @@ public class MessageListenerService extends ListenerAdapter {
                 Here are the list of the commands this bot can do:""");
             helpEmbedMessage.addField("Commands:", """
                 ``/help`` - Opens this message again.
+                ``/ask`` - Ask a question to the bot.
                 ``/createDB`` - Creates a unique database for users to join.
                 ``/addUserToDB`` - Invites a user to join your notes database.
                 ``/uploadNotes`` - Upload your notes to a respective database with given tags.
@@ -51,5 +53,10 @@ public class MessageListenerService extends ListenerAdapter {
             messageChannel.sendMessage("").setEmbeds(helpEmbedMessage.build()).queue();
         }
 
+        if (messageLine.startsWith("/ask ")) {
+            String formattedMessage = messageLine.substring("/ask ".length());
+            String returnedMessage = AISummaryService.generateResponse(formattedMessage);
+            messageChannel.sendMessage(returnedMessage).queue();
+        }
     }
 }

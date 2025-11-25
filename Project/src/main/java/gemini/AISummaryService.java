@@ -19,7 +19,21 @@ public class AISummaryService {
                     "Who are you",
                     config);
         }
-        return response.toString();
+        return response.text();
+    }
+    public static String generateResponse(String prompt) {
+        GenerateContentResponse response;
+        try (Client client = new Client()) {
+            GenerateContentConfig config = GenerateContentConfig
+                    .builder()
+                    .systemInstruction(Content.fromParts(Part.fromText("You are a Discord Bot named HiveNote.")))
+                    .build();
+            response = client.models.generateContent(
+                    "gemini-2.5-flash-lite",
+                    prompt,
+                    config);
+        }
+        return response.text();
     }
 }
 
