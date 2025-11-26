@@ -17,17 +17,39 @@ public class LatexConverter {
 
     // Use RegEx to extract latex expressions from a string
     // returns an arraylist of strings, where a string may contain a normal string or a latex expression.
-    public static ArrayList<String> extractLatexFromString(String string) {
-        ArrayList<String> result = new ArrayList<>();
+    public static ArrayList<Object> extractLatexFromString(String string) {
+        ArrayList<Object> result = new ArrayList<>();
         Pattern p = Pattern.compile(
-                "(?<!\\\\)\\$\\$(.+?)\\$\\$"
+                        // Match $$...$$ for display math mode
+                        "(?<!\\\\)\\$\\$(.+?)\\$\\$"
                         + "|"
+                        // Match $...$ for inline math mode
                         + "(?<!\\\\)(?<!\\d)\\$(?!\\d)(.+?)(?<!\\d)\\$(?!\\d)"
                         + "|"
+                        // Match \(...\) for escaped parentheses
                         + "\\\\\\((.+?)\\\\\\)"
                         + "|"
-                        + "\\\\\\[(.+?)\\\\]",
-                Pattern.DOTALL
+                        // Match \[...] for escaped square brackets
+                        + "\\\\\\[(.+?)\\\\]"
+                        + "|"
+                        // Match \textbf{...} for bold text
+                        + "\\\\textbf\\{(.+?)}"
+                        + "|"
+                        // Match \frac{...}{...} for fractions
+                        + "\\\\frac\\{(.+?)}\\{(.+?)}"
+                        + "|"
+                        // Match \int{...} for integrals
+                        + "\\\\int\\{(.+?)}"
+                        + "|"
+                        // Match Greek letters (like \alpha, \beta, etc.)
+                        + "\\\\([a-zA-Z]+)"
+                        + "|"
+                        // Match common math symbols (e.g., \sum, \prod, \lim, etc.)
+                        + "\\\\(sum|prod|lim|infty|alpha|beta|gamma|delta|theta|pi|rho|sigma|lambda|mu|omega|phi|tau|chi|varphi|varepsilon|vartheta|varkappa|upsilon|xi|zeta)"
+                        + "|"
+                        // Match operators like \sqrt, \frac, \sum, \int, etc.
+                        + "\\\\(sqrt|frac|sum|int|prod|lim|log|ln|sin|cos|tan|arcsin|arccos|arctan)"
+                , Pattern.DOTALL
         );
         Matcher m = p.matcher(string);
         int lastIndex = 0;
@@ -35,31 +57,31 @@ public class LatexConverter {
             if (m.start() > lastIndex) {
                 result.add(string.substring(lastIndex, m.start()));
             }
-            result.add(m.group());
+            result.add(convertLatexToImage(m.group()));
+            System.out.println("Extracted Latex Expression is: " + m.group());
             lastIndex = m.end();
         }
         if (lastIndex < string.length()) {
             result.add(string.substring(lastIndex));
         }
-        for (String e : result) {
-            System.out.println(e);
-        }
+
         return result;
     }
 
     // Converts given latex expression into a File object
     // Discord bot will attach file and upload it
     public static File convertLatexToImage(String string) {
-        File file = new File("latex/tempFile.png");
+        File file = new File("tempFile.png");
         TeXFormula teXFormula = new TeXFormula(string);
         TeXIcon teXIcon = teXFormula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 20);
         BufferedImage image = new BufferedImage(teXIcon.getIconWidth(), teXIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
-        g2d.setColor(Color.BLACK);
+        teXIcon.setForeground(Color.WHITE);
         teXIcon.paintIcon(null, g2d, 0, 0);
         g2d.dispose();
         try {
             ImageIO.write(image, "png", file);
+            System.out.println("Latex is converted to image with string " + string);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
