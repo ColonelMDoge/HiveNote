@@ -1,6 +1,7 @@
 package discord;
 
 import gemini.AISummaryService;
+import latex.LatexConverter;
 import net.dv8tion.jda.api.EmbedBuilder;
 
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
@@ -57,6 +58,7 @@ public class MessageListenerService extends ListenerAdapter {
             String formattedMessage = messageLine.substring("/ask ".length());
             String returnedMessage = AISummaryService.generateResponse(formattedMessage);
             messageChannel.sendMessage(returnedMessage).queue();
+            LatexConverter.extractLatexFromString(returnedMessage);
         }
     }
 }

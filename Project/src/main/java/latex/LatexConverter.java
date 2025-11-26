@@ -10,13 +10,41 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LatexConverter {
 
     // Use RegEx to extract latex expressions from a string
     // returns an arraylist of strings, where a string may contain a normal string or a latex expression.
     public static ArrayList<String> extractLatexFromString(String string) {
-        return null;
+        ArrayList<String> result = new ArrayList<>();
+        Pattern p = Pattern.compile(
+                "(?<!\\\\)\\$\\$(.+?)\\$\\$"
+                        + "|"
+                        + "(?<!\\\\)(?<!\\d)\\$(?!\\d)(.+?)(?<!\\d)\\$(?!\\d)"
+                        + "|"
+                        + "\\\\\\((.+?)\\\\\\)"
+                        + "|"
+                        + "\\\\\\[(.+?)\\\\]",
+                Pattern.DOTALL
+        );
+        Matcher m = p.matcher(string);
+        int lastIndex = 0;
+        while (m.find()) {
+            if (m.start() > lastIndex) {
+                result.add(string.substring(lastIndex, m.start()));
+            }
+            result.add(m.group());
+            lastIndex = m.end();
+        }
+        if (lastIndex < string.length()) {
+            result.add(string.substring(lastIndex));
+        }
+        for (String e : result) {
+            System.out.println(e);
+        }
+        return result;
     }
 
     // Converts given latex expression into a File object
