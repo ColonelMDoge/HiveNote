@@ -240,12 +240,12 @@ Deletes an entire database instance.
 ### 4.1 Software
 - Java 17+
 - Maven for dependency management.
-- MySQL.
-- JaCoco for logging.
-- OCI API for DB connection.
+- SQL Language for database.
+- JaCoCo for logging.
+- Ojdbc for OCI DB connection.
 - Java Discord API.
-- OpenAI or related GPT.
-- LaTeX renderer.
+- Google Gemini API.
+- jLaTeXMath for LaTeX rendering.
 
 ---
 

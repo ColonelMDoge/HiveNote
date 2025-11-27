@@ -23,9 +23,9 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 ### 4. Project Scope
 
 #### In Scope
-- MySQL database integration.
+- SQL database integration.
 - Java Discord Application integration.
-- OpenAI or related GPT API integration.
+- Gemini API integration.
 - User authentication system.
 - LaTeX rendering.
 - Rigorous testing and logging.
@@ -46,27 +46,27 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 
 ### 6. Stakeholders
 
-| Stakeholder | Role / Interest | Responsibilities / Expectations |
-|-------------|-----------------|---------------------------------|
-| **Development Team** | Implementation of core | Develop, test, document, and deployment.|
-| **Testers / QA Members** | Ensure quality and coverage of app | Create reports of various tests.|
-| **End Users** | App users | Expect secure and reliable app.|
+| Stakeholder              | Role / Interest                    | Responsibilities / Expectations          |
+|--------------------------|------------------------------------|------------------------------------------|
+| **Development Team**     | Implementation of core             | Develop, test, document, and deployment. |
+| **Testers / QA Members** | Ensure quality and coverage of app | Create reports of various tests.         |
+| **End Users**            | App users                          | Expect secure and reliable app.          |
 
 ---
 
 ### 7. Roles and Responsibilities
 
-| Role | Description | Assigned To |
-|------|-------------|-------------|
-| **Product Owner** | Oversees and defines the vision of project | ColonelMDoge|
-| **Development Team** | Implements the features | ColonelMDoge |
-| **Testers** | Tests the app for any issues | QA Team |
+| Role                 | Description                                | Assigned To  |
+|----------------------|--------------------------------------------|--------------|
+| **Product Owner**    | Oversees and defines the vision of project | ColonelMDoge |
+| **Development Team** | Implements the features                    | ColonelMDoge |
+| **Testers**          | Tests the app for any issues               | QA Team      |
 
 ---
 
 ### 8. Tools, Technologies, and Dependencies
 - **Language:** Java
-- **Database:** MySQL on Oracle Cloud Infrastructure DB 
+- **Database:** SQL on Oracle Cloud Infrastructure DB 
 - **Version Control:** GitHub
 - **Testing:** 'java.util.Logging'
 - **Deployment:** Oracle Cloud Infrastructure Instance
@@ -79,7 +79,7 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 - Data must be stored securely.
 - Assumes one or more admins to manage either redundant or troll uploads.
 - Code coverage target of **>=80%** for core functions.
-- System where users are associated to individuale tables to represent a class.
+- System where users are associated to individual tables to represent a class.
 - Assumes text output will not exceed Discord maximum message length
 - All private keys and environment files will be excluded from Git repository.
 
@@ -96,20 +96,22 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 
 ### 11. Budget
 - There are currently no anticipated costs for this project.
+- As userbase scales, funding will be required to support database storage and Gemini API requests.
 
 ---
 
 ### 12. Approvals
-- Project Charter Approval Date:
-- Project Manager Acknowledgement: 
+- Project Charter Approval Date: 11/19/2025
+- Project Manager Acknowledgement: ColonelMDoge
 
 ---
 
 ### 13. Revision History
 
-| Change Made By  | Date Change Made | Details of Change | Approved By | Approval Date |
-|-----------------|------------------|-------------------|-------------|---------------|
-| ColonelMDoge    | 11/20/2025       | Renamed functions and formatted strings correctly | PNC Logistics | 11/20/2025 |
+| Change Made By | Date Change Made | Details of Change                                     | Approved By   | Approval Date |
+|----------------|------------------|-------------------------------------------------------|---------------|---------------|
+| ColonelMDoge   | 11/20/2025       | Renamed functions and formatted strings correctly     | PNC Logistics | 11/20/2025    |
+| ColonelMDoge   | 11/27/2025       | Updated potential budget changes and SQL language use | PNC Logistics | 11/27/2025    |
 
 ---
 

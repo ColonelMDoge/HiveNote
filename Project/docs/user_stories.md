@@ -14,15 +14,15 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 **so that** my contributions are valued by my peers.
 
 **As a** user,
-**I want** to associated with multiple DBs
+**I want** to associate with multiple DBs
 **so that** I can share my notes among multiple groups.
 
 **Acceptance Criteria:**
-- Each note includes a 'userid' field.
+- Each note includes an 'userid' field.
 - Each DB includes an array of 'userid's.
 
 ### User Story 1.2 - Admin Control
-**As a** admin,
+**As an** admin,
 **I want** to oversee all notes in a DB
 **So that** I can remove notes that are off-topic or move notes around to its proper categories.
 
