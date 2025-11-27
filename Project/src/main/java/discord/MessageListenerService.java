@@ -46,13 +46,11 @@ public class MessageListenerService extends ListenerAdapter {
         for (Object object : list) {
             if (object instanceof File) {
                 try (FileUpload file = FileUpload.fromData((File) object)) {
-                    System.out.println("Latex: " + file);
                     channel.sendFiles(file).queue();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             } else if (object instanceof String) {
-                System.out.println("Message: " + object);
                 channel.sendMessage(object.toString()).queue();
             } else {
                 System.out.println("Attempted to send a non String or File object!");

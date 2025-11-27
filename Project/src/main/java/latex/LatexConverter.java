@@ -58,30 +58,34 @@ public class LatexConverter {
                 result.add(string.substring(lastIndex, m.start()));
             }
             result.add(convertLatexToImage(m.group()));
-            System.out.println("Extracted Latex Expression is: " + m.group());
             lastIndex = m.end();
         }
         if (lastIndex < string.length()) {
             result.add(string.substring(lastIndex));
         }
-
         return result;
     }
 
     // Converts given latex expression into a File object
     // Discord bot will attach file and upload it
     public static File convertLatexToImage(String string) {
-        File file = new File("tempFile.png");
-        TeXFormula teXFormula = new TeXFormula(string);
-        TeXIcon teXIcon = teXFormula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 20);
-        BufferedImage image = new BufferedImage(teXIcon.getIconWidth(), teXIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
-        teXIcon.setForeground(Color.WHITE);
-        teXIcon.paintIcon(null, g2d, 0, 0);
-        g2d.dispose();
+        File file;
         try {
+            file = File.createTempFile("tempFile", ".png");
+            TeXFormula teXFormula = new TeXFormula(string);
+            TeXIcon teXIcon = teXFormula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 20);
+            BufferedImage image = new BufferedImage(teXIcon.getIconWidth(), teXIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+
+            Graphics2D g2d = image.createGraphics();
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+            teXIcon.setForeground(Color.WHITE);
+            teXIcon.paintIcon(null, g2d, 0, 0);
+            g2d.dispose();
             ImageIO.write(image, "png", file);
-            System.out.println("Latex is converted to image with string " + string);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
