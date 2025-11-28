@@ -4,7 +4,6 @@ import org.scilab.forge.jlatexmath.TeXFormula;
 import org.scilab.forge.jlatexmath.TeXIcon;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -20,8 +19,8 @@ public class LatexConverter {
     public static ArrayList<Object> extractLatexFromString(String string) {
         ArrayList<Object> result = new ArrayList<>();
         Pattern p = Pattern.compile(
-                        // Match $$...$$ for display math mode
-                        "(?<!\\\\)\\$\\$(.+?)\\$\\$"
+                // Match $$...$$ for display math mode
+                "(?<!\\\\)\\$\\$(.+?)\\$\\$"
                         + "|"
                         // Match $...$ for inline math mode
                         + "(?<!\\\\)(?<!\\d)\\$(?!\\d)(.+?)(?<!\\d)\\$(?!\\d)"
@@ -38,19 +37,22 @@ public class LatexConverter {
                         // Match \frac{...}{...} for fractions
                         + "\\\\frac\\{(.+?)}\\{(.+?)}"
                         + "|"
-                        // Match \int{...} for integrals
-                        + "\\\\int\\{(.+?)}"
+                        // Match integrals with optional limits: \int_{lower}^{upper} integrand
+                        + "\\\\int(?:_\\{(.+?)})?(?:\\^\\{(.+?)})?\\s*(.+?)"
                         + "|"
                         // Match Greek letters (like \alpha, \beta, etc.)
                         + "\\\\([a-zA-Z]+)"
                         + "|"
-                        // Match common math symbols (e.g., \sum, \prod, \lim, etc.)
+                        // Match common math symbols
                         + "\\\\(sum|prod|lim|infty|alpha|beta|gamma|delta|theta|pi|rho|sigma|lambda|mu|omega|phi|tau|chi|varphi|varepsilon|vartheta|varkappa|upsilon|xi|zeta)"
                         + "|"
                         // Match operators like \sqrt, \frac, \sum, \int, etc.
                         + "\\\\(sqrt|frac|sum|int|prod|lim|log|ln|sin|cos|tan|arcsin|arccos|arctan)"
                 , Pattern.DOTALL
         );
+        string = string.replaceAll("(?m)^```(?:latex|math)\\s*$", "");
+        string = string.replaceAll("(?m)^```\\s*$", "");
+
         Matcher m = p.matcher(string);
         int lastIndex = 0;
         while (m.find()) {
@@ -68,7 +70,7 @@ public class LatexConverter {
 
     // Converts given latex expression into a File object
     // Discord bot will attach file and upload it
-    public static File convertLatexToImage(String string) {
+    private static File convertLatexToImage(String string) {
         File file;
         try {
             file = File.createTempFile("tempFile", ".png");

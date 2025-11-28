@@ -7,29 +7,17 @@ import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
 
 public class AISummaryService {
-    GenerateContentResponse response;
-    public String generateSummary() {
-        try (Client client = new Client()) {
-            GenerateContentConfig config = GenerateContentConfig
-                    .builder()
-                    .systemInstruction(Content.fromParts(Part.fromText("You are a Discord Bot named HiveNote.")))
-                    .build();
-            response = client.models.generateContent(
-                    "gemini-2.5-flash-lite",
-                    "Who are you",
-                    config);
-        }
-        return response.text();
-    }
+    private static final String MODEL_NAME = "gemini-2.5-flash-lite";
+    private static final String SYSTEM_INSTRUCTION = "You are a Discord Bot named HiveNote.";
     public static String generateResponse(String prompt) {
         GenerateContentResponse response;
         try (Client client = new Client()) {
             GenerateContentConfig config = GenerateContentConfig
                     .builder()
-                    .systemInstruction(Content.fromParts(Part.fromText("You are a Discord Bot named HiveNote.")))
+                    .systemInstruction(Content.fromParts(Part.fromText(SYSTEM_INSTRUCTION)))
                     .build();
             response = client.models.generateContent(
-                    "gemini-2.5-flash-lite",
+                    MODEL_NAME,
                     prompt,
                     config);
         }

@@ -10,15 +10,14 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class MessageListenerService extends ListenerAdapter {
-    EmbedBuilder embedBuilder = new BotDescription();
-    final String CHANNEL_NAME = "bot-channel";
-
+    private final EmbedBuilder embedBuilder = new BotDescription();
+    protected final String CHANNEL_NAME = "bot-channel";
+    protected final int DISCORD_MESSAGE_CHAR_LIMIT = 2000;
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -42,7 +41,9 @@ public class MessageListenerService extends ListenerAdapter {
         }
     }
 
-    protected void sendMessages(MessageChannel channel, ArrayList<Object> list) {
+    // Determines whether the Object is a File or a String
+    // Bypasses Discord's DISCORD_MESSAGE_CHAR_LIMIT by sending a message in parts
+    private void sendMessages(MessageChannel channel, ArrayList<Object> list) {
         for (Object object : list) {
             if (object instanceof File) {
                 try (FileUpload file = FileUpload.fromData((File) object)) {
@@ -51,6 +52,13 @@ public class MessageListenerService extends ListenerAdapter {
                     throw new RuntimeException(e);
                 }
             } else if (object instanceof String) {
+                if (((String) object).length() > DISCORD_MESSAGE_CHAR_LIMIT) {
+                    do {
+                        String cutMessage = object.toString().substring(0,DISCORD_MESSAGE_CHAR_LIMIT);
+                        channel.sendMessage(cutMessage).queue();
+                        object = object.toString().substring(cutMessage.length());
+                    } while (((String) object).length() > DISCORD_MESSAGE_CHAR_LIMIT);
+                }
                 channel.sendMessage(object.toString()).queue();
             } else {
                 System.out.println("Attempted to send a non String or File object!");
