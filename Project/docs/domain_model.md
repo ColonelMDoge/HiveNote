@@ -2,97 +2,44 @@
 
 ## Overview
 This document defines the database schema, including entities, attributes, and relationships.  
-The schema supports multiple users, databases, notes, tags, and optional AI-generated outputs (summaries, insights, questions).
+The schema supports notes, tags, and optional AI-generated outputs (summaries, insights, questions).
 
 ---
 
 ## Entities
 
-### 1. HiveNote_User
-Represents a person using HiveNote.
-
-| Attribute      | Type          | Description                                                            |
-|----------------|---------------|------------------------------------------------------------------------|
-| userid         | String        | Unique identifier for the user (Discord ID).                           |
-| username       | String        | Optional: cached Discord username.                                     |
-| isAdmin        | Boolean       | Determines whether the user is an admin in their respective databases. |
-| joined_at      | DateTime      | Timestamp when the user joined the system.                             |
-
-**Relationships:**
-- One `User` can have **many Notes** (one-to-many).  
-- One `User` can be associated with **many Databases** (many-to-many via `DatabaseUsers`).
-
----
-
-### 2. HiveNote_Note
+### 1. HiveNote_Note
 Represents an individual note in the database.
 
 | Attribute     | Type                  | Description                                         |
 |---------------|-----------------------|-----------------------------------------------------|
 | note_id       | String                | Unique identifier for the note.                     |
 | userid        | String                | ID of the user who uploaded this note.              |
-| database_id   | String                | ID of the database this note belongs to.            |
 | title         | String                | Title of the note.                                  |
 | upload_date   | DateTime              | Timestamp when the note was uploaded.               |
 | document_file | Variable File         | Original file associated with the note.             |
 | content       | Text                  | Plain-text or markdown version of the note content. |
 
 **Relationships:**
-- Each `Note` belongs to **one User** (many-to-one).  
-- Each `Note` belongs to **one Database**.  
+- Each `Note` belongs to **one User** (many-to-one).
 - Each `Note` can have **many Tags** (many-to-many via `NoteTags`).
 
 ---
 
-### 3. HiveNote_Database
-Represents a collection of notes that users can join.
-
-| Attribute    | Type     | Description                                    |
-|--------------|----------|------------------------------------------------|
-| database_id  | String   | Unique identifier for the database.            |
-| name         | String   | Optional human-readable name.                  |
-| created_at   | DateTime | Timestamp when the database was created.       |
-| owner_userid | String   | User ID of the admin who created the database. |
-
-**Relationships:**
-- One `Database` can have **many Users** (many-to-many via `DatabaseUsers`).  
-- One `Database` can contain **many Notes** (one-to-many).  
-- One `Database` can have **many Tags** (one-to-many).
-
----
-
-### 4. HiveNote_Tag
+### 2. HiveNote_Tag
 Represents a label that can be applied to notes for categorization and retrieval.
 
 | Attribute   | Type   | Description                                        |
 |-------------|--------|----------------------------------------------------|
 | tag_id      | String | Unique identifier for the tag.                     |
-| database_id | String | ID of the database where the tag exists.           |
 | name        | String | Name of the tag. Must be unique within a database. |
 
 **Relationships:**
-- One `Tag` can be associated with **many Notes** (many-to-many via `NoteTags`).  
-- One `Tag` belongs to **one Database**.
+- One `Tag` can be associated with **many Notes** (many-to-many via `NoteTags`).
 
 ---
 
-### 5. DatabaseUsers (junction table)
-Represents the many-to-many relationship between Users and Databases.
-
-| Attribute   | Type     | Description                                             |
-|-------------|----------|---------------------------------------------------------|
-| id          | Integer  | Primary key (auto-increment).                           |
-| database_id | String   | Foreign key → `Database`.                               |
-| user_id     | String   | Foreign key → `User`.                                   |
-| is_admin    | Boolean  | Whether the user has admin privileges in this database. |
-| joined_at   | DateTime | Timestamp when the user joined the database.            |
-
-**Relationships:**
-- Connects Users ↔ Databases with admin roles.
-
----
-
-### 6. NoteTags (junction table)
+### 3. NoteTags (junction table)
 Represents the many-to-many relationship between Notes and Tags.
 
 | Attribute | Type    | Description                   |

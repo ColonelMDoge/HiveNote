@@ -13,13 +13,9 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 **I want** my uploaded notes to be associated with my userid
 **so that** my contributions are valued by my peers.
 
-**As a** user,
-**I want** to associate with multiple DBs
-**so that** I can share my notes among multiple groups.
 
 **Acceptance Criteria:**
 - Each note includes an 'userid' field.
-- Each DB includes an array of 'userid's.
 
 ### User Story 1.2 - Admin Control
 **As an** admin,
@@ -28,7 +24,7 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 
 **Acceptance Criteria:**
 - User is an admin for the DB
-- Notes are read, write, and edit only to the admin
+- Notes are read, written, and edited only to the admin
 
 ---
 
@@ -37,7 +33,7 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 ### User Story 2.1 - Uploading Notes
 **As a** user,
 **I want** to upload notes to the DB
-**so that** I can them store them for later use.
+**so that** I can store them for later use.
 
 **Acceptance Criteria:**
 - Discord Bot immediately reflects updates to the DB.
@@ -45,7 +41,7 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 ### User Story 2.2 - Deleting Notes
 **As a** user,
 **I want** to delete my notes
-**so that** if there are errors in the notes I can remove them and reupload the note.
+**so that** if there are errors in the notes, I can remove them and reupload the note.
 
 **Acceptance Criteria:**
 - Discord Bot immediately reflects updates to the DB.
@@ -56,7 +52,7 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 **so that** I can get relevant information that I need.
 
 **Acceptance Criteria:**
-- Submitted tags follows a RegEx to generalize multitude of different topics.
+- Submitted tags follow a RegEx to generalize a multitude of different topics.
 
 ---
 
@@ -78,7 +74,7 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 **Acceptance Criteria:**
 - LaTeX expressions form correctly.
 - AI API is fast responsive.
-- Output does not exceed Discord character limit.
+- Output does not exceed the Discord character limit.
 
 ---
 

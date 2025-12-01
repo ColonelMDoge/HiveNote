@@ -8,43 +8,7 @@ Users can then retrieve notes based on tags or filters, and use AI to generate s
 
 ## 2. Functional Requirements
 
-### 2.1 createDB()
-**Description:**  
-Creates a unique database instance for users to join.
-
-**Inputs:**  
-- N/A
-
-**Process:**  
-- Program generates a unique database ID not associated with any existing databases.
-
-**Outputs:**  
-- `databaseID`  
-- Confirmation message
-
----
-
-### 2.2 addUserToDB()
-**Description:**  
-Adds a new user to the specified database.
-
-**Inputs:**  
-- `userid` (string)  
-- `databaseID` (string)  
-- `isAdmin` (boolean)
-
-**Process:**  
-- Verify the database exists  
-- Check if the user is already a member  
-- Add the user with correct role (admin or non-admin)
-
-**Outputs:**  
-- Confirmation message  
-- Updated user list
-
----
-
-### 2.3 uploadNotes()
+### 2.1 uploadNotes()
 **Description:**  
 Allows a user to upload notes and tag them for organization and retrieval.
 
@@ -56,7 +20,7 @@ Allows a user to upload notes and tag them for organization and retrieval.
 
 **Process:**  
 - Validate user membership  
-- Store note content in database  
+- Store note content in a database  
 - Associate tags with note  
 - Timestamp the entry
 - Add author's userid
@@ -67,7 +31,7 @@ Allows a user to upload notes and tag them for organization and retrieval.
 
 ---
 
-### 2.4 retrieveNotes()
+### 2.2 retrieveNotes()
 **Description:**  
 Fetches notes that match user-defined filters such as tags or keywords.
 
@@ -85,7 +49,7 @@ Fetches notes that match user-defined filters such as tags or keywords.
 
 ---
 
-### 2.5 generateSummary()
+### 2.3 generateSummary()
 **Description:**  
 Uses AI to generate a concise summary based on selected notes.
 
@@ -103,7 +67,7 @@ Uses AI to generate a concise summary based on selected notes.
 
 ---
 
-### 2.6 generateQuestions()
+### 2.4 generateQuestions()
 **Description:**  
 Creates study questions from provided notes using an AI model.
 
@@ -121,7 +85,7 @@ Creates study questions from provided notes using an AI model.
 
 ---
 
-### 2.7 generateInsights()
+### 2.5 generateInsights()
 **Description:**  
 Produces conceptual insights or themes extracted from notes.
 
@@ -138,7 +102,7 @@ Produces conceptual insights or themes extracted from notes.
 
 ---
 
-### 2.8 createTag()
+### 2.6 createTag()
 **Description:**  
 Allows admins or users to add new tags to the database.
 
@@ -157,26 +121,7 @@ Allows admins or users to add new tags to the database.
 
 ---
 
-### 2.9 removeUserFromDB()
-**Description:**  
-Removes a user from a database.
-
-**Inputs:**  
-- `userid`  
-- `databaseID`  
-- `deleteNotes` (boolean)
-
-**Process:**  
-- Verify admin privileges  
-- Remove user  
-- If requested, delete or orphan their notes
-
-**Outputs:**  
-- Confirmation message
-
----
-
-### 2.10 deleteMyNotes()
+### 2.7 deleteMyNotes()
 **Description:**
 Deletes notes that are owned by the calling user
 
@@ -186,29 +131,10 @@ Deletes notes that are owned by the calling user
 - `databaseID`
 
 **Process:**
-- Verify that respective notes are owned by the user
-- Verify that user is in the DB
+- Verify that the user owns respective notes
 - Delete the provided notes
 
 **Outputs:**
-- Confirmation message
-
----
-
-### 2.11 deleteDB()
-**Description:**  
-Deletes an entire database instance.
-
-**Inputs:**  
-- `databaseID`  
-- `adminID`
-
-**Process:**  
-- Verify admin permissions  
-- Delete database, users, notes, and tags  
-- Remove database from registry
-
-**Outputs:**  
 - Confirmation message
 
 ---
@@ -224,11 +150,11 @@ Deletes an entire database instance.
 - Database IDs must be globally unique.
 
 ### 3.3 Scalability
-- System should support **thousands** of notes and **hundreds** of users per database.
+- The System should support **hundreds** of notes and **tens** of users per database.
 
 ### 3.4 Security
 - Only verified users may access a database.  
-- Only admins may delete databases or users.
+- Only admins may delete databases.
 
 ### 3.5 Maintainability
 - Code must follow modular structure: DB operations, AI operations, and Discord command handlers.
@@ -240,7 +166,7 @@ Deletes an entire database instance.
 ### 4.1 Software
 - Java 17+
 - Maven for dependency management.
-- SQL Language for database.
+- SQL Language for a database.
 - JaCoCo for logging.
 - Ojdbc for OCI DB connection.
 - Java Discord API.

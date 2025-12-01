@@ -14,8 +14,8 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 ---
 
 ### 3. Project Objectives
-- Implement **user registration**, **upload**, **delete**, and **HiveMind AI** functionality.
-- Implement the core features: `createDB()`, `addUserToDB()`, `uploadNotes()`, `deleteMyNotes()`, `retrieveNotes()`, `generateSummary()`, etc. 
+- Implement **upload**, **delete**, and **HiveMind AI** functionality.
+- Implement the core features: `uploadNotes()`, `deleteMyNotes()`, `retrieveNotes()`, `generateSummary()`, etc. 
 - Integrate **logging** with **code coverage** to ensure thorough testing.
 
 ---
@@ -68,19 +68,19 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 - **Language:** Java
 - **Database:** SQL on Oracle Cloud Infrastructure DB 
 - **Version Control:** GitHub
-- **Testing:** 'java.util.Logging'
+- **Testing:** `java.util.Logging`
 - **Deployment:** Oracle Cloud Infrastructure Instance
-- **Documentation:** Markdown ('/docs' folder)
+- **Documentation:** Markdown (`/docs` folder)
 - **Coverage Reporting:** HTML coverage reports using JaCoCo
 
 ---
 
 ### 9. Constraints & Assumptions
 - Data must be stored securely.
-- Assumes one or more admins to manage either redundant or troll uploads.
+- Assume one or more admins to manage either redundant or troll uploads.
 - Code coverage target of **>=80%** for core functions.
-- System where users are associated to individual tables to represent a class.
-- Assumes text output will not exceed Discord maximum message length
+- System where users are associated with individual tables to represent a class.
+- Assumes text output, if exceeding the character limit, will be sent in blocks.
 - All private keys and environment files will be excluded from Git repository.
 
 ---
@@ -95,7 +95,7 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 ---
 
 ### 11. Budget
-- There are currently no anticipated costs for this project.
+- There are currently no expected costs for this project.
 - As userbase scales, funding will be required to support database storage and Gemini API requests.
 
 ---
@@ -112,7 +112,7 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 |----------------|------------------|-------------------------------------------------------|---------------|---------------|
 | ColonelMDoge   | 11/20/2025       | Renamed functions and formatted strings correctly     | PNC Logistics | 11/20/2025    |
 | ColonelMDoge   | 11/27/2025       | Updated potential budget changes and SQL language use | PNC Logistics | 11/27/2025    |
-
+| ColonelMDoge   | 11/30/2025       | Removed some core functions and edited clarity        | PNC Logistics | 11/30/2025    |
 ---
 
 **File:** `Project/docs/charter.md`
