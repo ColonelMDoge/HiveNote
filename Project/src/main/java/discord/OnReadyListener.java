@@ -1,11 +1,16 @@
 package discord;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.components.selections.SelectOption;
+import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+
+import java.io.*;
+import java.util.Arrays;
 
 public class OnReadyListener extends ListenerAdapter {
     public void onReady(ReadyEvent event) {
@@ -33,6 +38,54 @@ public class OnReadyListener extends ListenerAdapter {
                     Commands.slash("delete_course_code", "Delete a course code.")
                             .addOption(OptionType.STRING, "deleted_course", "Delete a course code that exists.", true)
             ).queue();
+            load();
+            saveOnShutDown();
+        }
+    }
+
+    private void saveOnShutDown() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("The bot is shutting down!");
+            try (FileWriter fileWriter = new FileWriter("src/main/resources/saved_tags.txt")) {
+                StringSelectMenu.Builder courses = StringSelectMenuManager.getCourseCodeMenu();
+                StringSelectMenu.Builder tags = StringSelectMenuManager.getTagMenu();
+                if (courses.getOptions().isEmpty() && tags.getOptions().isEmpty()) return;
+
+                StringBuilder builder = new StringBuilder();
+                for (SelectOption selectOption : courses.getOptions()) {
+                    builder.append(selectOption.getValue()).append(",");
+                }
+                builder.append("\n");
+                for (SelectOption selectOption : tags.getOptions()) {
+                    builder.append(selectOption.getValue()).append(",");
+                }
+                builder.append("\n");
+                fileWriter.write(builder.toString());
+                System.out.println("Course codes and tags saved!");
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }));
+    }
+    private void load() {
+        try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/saved_tags.txt"))) {
+            String courseCodeLine = br.readLine(), tagLine = br.readLine();
+            if (courseCodeLine == null || tagLine == null) return;
+
+            String[] courseCodes = courseCodeLine.split(",");
+            Arrays.sort(courseCodes);
+            String[] tags = tagLine.split(",");
+            Arrays.sort(tags);
+
+            for (String courseCode : courseCodes) {
+                StringSelectMenuManager.addCourseCode(courseCode);
+            }
+            for (String tag : tags) {
+                StringSelectMenuManager.addTag(tag);
+            }
+            System.out.println("Course codes and tags loaded!");
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -40,9 +40,9 @@ public class SlashCommandListener extends ListenerAdapter {
                 event.reply("Tags are empty! Please create some tags!").queue();
                 return;
             }
-            Modal uploadModal = Modal.create("upload-modal", "Note Upload Details")
+            Modal uploadModal = Modal.create("upload_modal", "Note Upload Details")
                     .addComponents(
-                            Label.of("Note File", AttachmentUpload.of("uploaded-note")),
+                            Label.of("Note File", AttachmentUpload.of("uploaded_note")),
                             Label.of("Title", TextInput.create("title", TextInputStyle.SHORT).build()),
                             Label.of("Summary", TextInput.create("summary", TextInputStyle.SHORT).build()),
                             Label.of("Course Code", StringSelectMenuManager.getCourseCodeMenu().build()),
