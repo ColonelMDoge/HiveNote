@@ -73,7 +73,7 @@ public class LatexConverter {
     private static File convertLatexToImage(String string) {
         File file;
         try {
-            file = File.createTempFile("tempFile", ".png");
+            file = File.createTempFile("src/main/resources/tempFile", ".png");
             TeXFormula teXFormula = new TeXFormula(string);
             TeXIcon teXIcon = teXFormula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 20);
             BufferedImage image = new BufferedImage(teXIcon.getIconWidth(), teXIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);

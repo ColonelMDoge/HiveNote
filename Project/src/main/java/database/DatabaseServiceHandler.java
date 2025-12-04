@@ -36,7 +36,7 @@ public class DatabaseServiceHandler {
             DatabaseServiceHandler uds = new DatabaseServiceHandler();
             uds.testConnection();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -1,3 +1,4 @@
+import discord.ModalListener;
 import discord.OnReadyListener;
 import discord.SlashCommandListener;
 import net.dv8tion.jda.api.JDABuilder;
@@ -14,7 +15,7 @@ public class HiveNoteBot {
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableCache(CacheFlag.ONLINE_STATUS)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MEMBERS)
-                .addEventListeners(new OnReadyListener(), new SlashCommandListener())
+                .addEventListeners(new OnReadyListener(), new SlashCommandListener(), new ModalListener())
                 .build();
     }
 }
