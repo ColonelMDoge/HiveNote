@@ -19,7 +19,8 @@ public class OnReadyListener extends ListenerAdapter {
         Guild testGuild = jda.getGuildById("1127969348049457295");
         if (testGuild != null) {
             testGuild.updateCommands().addCommands(
-                    Commands.slash("upload", "Upload a file to the database."),
+                    Commands.slash("upload", "Upload a file to the database.")
+                            .addOption(OptionType.STRING, "asked_course", "Course code related to file.", true),
 
                     Commands.slash("ask", "Prompt you want to ask.")
                             .addOption(OptionType.STRING, "asked_prompt", "Prompt you want to ask.", true),
