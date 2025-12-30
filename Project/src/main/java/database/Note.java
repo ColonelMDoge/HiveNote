@@ -1,23 +1,31 @@
 package database;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
+import java.time.OffsetDateTime;
 import java.util.List;
 
-public class Note {
-    private final String title;
-    private final String summary;
-    private final File file;
-    private final String courseCode;
-    private final List<String> tags;
-    public Note(String title, String summary, File file, String courseCode, List<String> tags) {
-        this.title = title;
-        this.summary = summary;
-        this.file = file;
-        this.courseCode = courseCode;
-        this.tags = tags;
-    }
+public record Note(String USER_ID,
+                   String TITLE,
+                   String COURSE_CODE,
+                   String NOTE_CONTENT,
+                   OffsetDateTime CREATED_AT,
+                   OffsetDateTime UPDATED_AT,
+                   File DOCUMENT_FILE,
+                   List<String> TAGS) {
+    @NotNull
     @Override
     public String toString() {
-        return "Note [title=" + title + ", summary=" + summary + ", file=" + file.getName() + ", courseCode=" + courseCode + ", tags=" + tags.toString() + "]";
+        return String.format("""
+                Note: %s
+                Title: %s
+                User: %s
+                Course Code: %s
+                Summary: %s
+                Tags: %s
+                Created: %s
+                Updated: %s
+                """, DOCUMENT_FILE.getName(), TITLE, USER_ID, COURSE_CODE, NOTE_CONTENT, String.join(",", TAGS), CREATED_AT, UPDATED_AT);
     }
 }

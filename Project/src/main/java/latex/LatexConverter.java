@@ -1,4 +1,5 @@
 package latex;
+import logging.LoggerUtil;
 import org.scilab.forge.jlatexmath.TeXConstants;
 import org.scilab.forge.jlatexmath.TeXFormula;
 import org.scilab.forge.jlatexmath.TeXIcon;
@@ -6,17 +7,20 @@ import org.scilab.forge.jlatexmath.TeXIcon;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LatexConverter {
+    private final Logger logger = LoggerUtil.getLogger(LatexConverter.class);
 
     // Use RegEx to extract latex expressions from a string
     // returns an arraylist of strings, where a string may contain a normal string or a latex expression.
-    public static ArrayList<Object> extractLatexFromString(String string) {
+    public ArrayList<Object> extractLatexFromString(String string) {
         ArrayList<Object> result = new ArrayList<>();
         Pattern p = Pattern.compile(
                 // Match $$...$$ for display math mode
@@ -70,10 +74,8 @@ public class LatexConverter {
 
     // Converts given latex expression into a File object
     // Discord bot will attach file and upload it
-    private static File convertLatexToImage(String string) {
-        File file;
+    private byte[] convertLatexToImage(String string) {
         try {
-            file = File.createTempFile("src/main/resources/tempFile", ".png");
             TeXFormula teXFormula = new TeXFormula(string);
             TeXIcon teXIcon = teXFormula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 20);
             BufferedImage image = new BufferedImage(teXIcon.getIconWidth(), teXIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -87,10 +89,12 @@ public class LatexConverter {
             teXIcon.setForeground(Color.WHITE);
             teXIcon.paintIcon(null, g2d, 0, 0);
             g2d.dispose();
-            ImageIO.write(image, "png", file);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", byteArrayOutputStream);
+            return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.SEVERE, "Error converting latex to image", e);
         }
-        return file;
+        return null;
     }
 }

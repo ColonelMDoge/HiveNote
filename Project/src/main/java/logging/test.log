@@ -1,0 +1,7 @@
+2025-12-29 21:28:32 [INFO] logging.LoggerUtil.setupLogging: Logging started. 
+2025-12-29 21:28:37 [INFO] discord.OnReadyListener.onReady: The Discord bot is ready. 
+2025-12-29 21:28:37 [INFO] discord.CourseToTagLinker.loadOnStartup: Course and tag contents successfully loaded to map object. 
+2025-12-29 21:28:42 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "help" slash command interaction was received from: colonelmdoge. 
+2025-12-29 22:10:32 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "ask" slash command interaction was received from: colonelmdoge. 
+2025-12-29 22:13:12 [INFO] discord.CourseToTagLinker.lambda$saveOnShutDown$0: The bot is shutting down. 
+2025-12-29 22:13:12 [INFO] discord.CourseToTagLinker.lambda$saveOnShutDown$0: Course and tag contents successfully saved to serialized file. 
