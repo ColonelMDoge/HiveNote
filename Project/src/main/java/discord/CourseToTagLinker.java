@@ -1,6 +1,5 @@
 package discord;
 
-import database.DatabaseServiceHandler;
 import logging.LoggerUtil;
 import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 
@@ -25,7 +24,7 @@ public class CourseToTagLinker implements Serializable {
     }
 
     public boolean tagsDNE(String code) {
-        return !courseToTag.get(code.toUpperCase()).contains(code.toUpperCase());
+        return courseToTag.get(code.toUpperCase()).isEmpty();
     }
 
     public StringSelectMenu.Builder getTagsAsSSM(String course) {

@@ -1,5 +1,6 @@
 package discord;
 
+import database.DatabaseServiceHandler;
 import database.Note;
 import logging.LoggerUtil;
 import net.dv8tion.jda.api.entities.Message;
@@ -8,39 +9,43 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ModalListener extends ListenerAdapter {
+    private final DatabaseServiceHandler dsh = new DatabaseServiceHandler();
     private final Logger logger = LoggerUtil.getLogger(ModalListener.class);
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
-        if (event.getModalId().equals("upload_modal")) {
+        String course = event.getModalId().split(":")[1].toUpperCase();
+        if (event.getModalId().startsWith("upload_modal:")) {
+            logger.info("Upload modal event has been triggered.");
             Message.Attachment attachment = Objects.requireNonNull(event.getValue("uploaded_note")).getAsAttachmentList().get(0);
             File file;
             try {
                 file = File.createTempFile(attachment.getFileName().substring(0, attachment.getFileName().lastIndexOf('.')), '.' + attachment.getFileExtension());
-                CompletableFuture<File> future = attachment.getProxy().downloadToFile(file);
-                future.exceptionally(error -> {
-                    logger.log(Level.SEVERE, "Error downloading file", error);
-                    return null;
-                });
-            } catch (IOException e) {
+                attachment.getProxy().downloadToFile(file).join();
+            } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error with the file", e);
                 return;
             }
-            Note note = new Note(
-                    event.getUser().getId(),
-                    Objects.requireNonNull(event.getValue("title")).getAsString(),
-                    Objects.requireNonNull(event.getValue("course_code_menu")).getAsStringList().get(0),
-                    Objects.requireNonNull(event.getValue("summary")).getAsString(),
-                    null,
-                    null,
-                    file,
-                    Objects.requireNonNull(event.getValue("tag_menu")).getAsStringList());
-            event.reply(note.toString()).queue();
+            try {
+                Note note = new Note(
+                        event.getUser().getId(),
+                        Objects.requireNonNull(event.getValue("title")).getAsString(),
+                        course,
+                        null,
+                        null,
+                        Objects.requireNonNull(event.getValue("summary")).getAsString(),
+                        file,
+                        file.getName(),
+                        Objects.requireNonNull(event.getValue(course + "_tags")).getAsStringList());
+                logger.info("Note has been successfully created.");
+                event.reply(note.toString()).queue();
+                dsh.uploadToDB(note);
+            } catch (NullPointerException npe) {
+                logger.log(Level.SEVERE, "Error creating note!", npe);
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
-2025-12-29 21:28:32 [INFO] logging.LoggerUtil.setupLogging: Logging started. 
-2025-12-29 21:28:37 [INFO] discord.OnReadyListener.onReady: The Discord bot is ready. 
-2025-12-29 21:28:37 [INFO] discord.CourseToTagLinker.loadOnStartup: Course and tag contents successfully loaded to map object. 
-2025-12-29 21:28:42 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "help" slash command interaction was received from: colonelmdoge. 
-2025-12-29 22:10:32 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "ask" slash command interaction was received from: colonelmdoge. 
-2025-12-29 22:13:12 [INFO] discord.CourseToTagLinker.lambda$saveOnShutDown$0: The bot is shutting down. 
-2025-12-29 22:13:12 [INFO] discord.CourseToTagLinker.lambda$saveOnShutDown$0: Course and tag contents successfully saved to serialized file. 
+2025-12-30 21:49:47 [INFO] logging.LoggerUtil.setupLogging: Logging started. 
+2025-12-30 21:49:48 [INFO] discord.OnReadyListener.onReady: The Discord bot is ready. 
+2025-12-30 21:49:49 [INFO] discord.CourseToTagLinker.loadOnStartup: Course and tag contents successfully loaded to map object. 
+2025-12-30 21:49:52 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "retrieve_by_id" slash command interaction was received from: colonelmdoge. 
+2025-12-30 21:49:55 [SEVERE] database.DatabaseServiceHandler.retrieveByNoteID: There was an exception getting a note! java.sql.SQLException: ORA-17014: Invalid ResultSet position. ResultSet is positioned before the first row.
+https://docs.oracle.com/error-help/db/ora-17014/
+2025-12-30 22:40:02 [INFO] discord.CourseToTagLinker.lambda$saveOnShutDown$0: The bot is shutting down. 

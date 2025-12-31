@@ -1,10 +1,7 @@
 package database;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.*;
+import java.sql.*;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -63,7 +60,7 @@ public class DatabaseServiceHandler {
 
     public void dropTag(String course, String tag) {
         String statement = """
-                DELETE FROM HIVENOTE_TAG WHERE TAG_NAME = ? AND COURSE_CODE = ?;
+                DELETE FROM HIVENOTE_TAG WHERE TAG_NAME = ? AND COURSE_CODE = ?
                 """;
         try (Connection conn = poolDataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -78,50 +75,65 @@ public class DatabaseServiceHandler {
 
     private void noteTagJunctionLinker(Connection conn, long note_id, long tag_id) throws SQLException {
         String statement = """
-                INSERT INTO NOTE_TAGS (NOTE_ID, TAG_ID) VALUES (?,?);
+                INSERT INTO NOTE_TAGS (NOTE_ID, TAG_ID) VALUES (?,?)
                 """;
         try (PreparedStatement ps = conn.prepareStatement(statement)) {
             ps.setLong(1, note_id);
             ps.setLong(2, tag_id);
             ps.executeUpdate();
+            logger.info(String.format("Successfully linked note ID %d to tag ID %d", note_id, tag_id));
         }
     }
 
     private long retrieveTagId(Connection conn, String course, String tag) throws SQLException {
         String statement = """
-                SELECT TAG_ID FROM HIVENOTE_TAG WHERE TAG_NAME = ? AND COURSE_CODE = ?;
+                SELECT TAG_ID FROM HIVENOTE_TAG WHERE TAG_NAME = ? AND COURSE_CODE = ?
                 """;
         try (PreparedStatement ps = conn.prepareStatement(statement)) {
             ps.setString(1, tag.toUpperCase());
             ps.setString(2, course.toUpperCase());
             ResultSet rs = ps.executeQuery();
-            return rs.getLong(1);
+            if (rs.next()) {
+                long id = rs.getLong(1);
+                logger.info(String.format("Retrieved tag \"%s\" with corresponding course \"%s\" and an ID of %d", tag, course, id));
+                return id;
+            }
+            return -1;
         }
     }
+
     public void uploadToDB(Note note) {
         String statement = """
                INSERT INTO HIVENOTE_NOTE\s
-               (USER_ID, NOTE_TITLE, COURSE_CODE, NOTE_CONTENT, UPDATED_AT, DOCUMENT_FILE)\s
-               VALUES (?,?,?,?,?,?);
+               (USER_ID, NOTE_TITLE, COURSE_CODE, UPDATED_AT, NOTE_SUMMARY, FILE, FILE_NAME)\s
+               VALUES (?,?,?,?,?,?,?)
                """;
         try (Connection conn = poolDataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(statement, PreparedStatement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement ps = conn.prepareStatement(statement, new String[]{"NOTE_ID"});
+             FileInputStream fis = new FileInputStream(note.FILE())) {
             ps.setString(1, note.USER_ID());
-            ps.setString(2, note.TITLE());
+            ps.setString(2, note.NOTE_TITLE());
             ps.setString(3, note.COURSE_CODE());
-            ps.setString(4, note.NOTE_CONTENT());
-            ps.setObject(5, OffsetDateTime.now(ZoneOffset.UTC));
-            ps.setObject(6, note.DOCUMENT_FILE());
+            ps.setTimestamp(4, Timestamp.valueOf(OffsetDateTime.now(ZoneOffset.UTC).toLocalDateTime()));
+            ps.setString(5, note.NOTE_SUMMARY());
+            ps.setBlob(6, fis);
+            ps.setString(7, note.FILE().getName());
+            ps.executeUpdate();
+
+            logger.info("Note successfully uploaded to the database.");
 
             ResultSet rs = ps.getGeneratedKeys();
-            long note_id = rs.getLong(1);
-            for (String tag : note.TAGS()) {
-                long tag_id = retrieveTagId(conn, note.COURSE_CODE(), tag);
-                noteTagJunctionLinker(conn, note_id, tag_id);
+            if (rs.next()) {
+                long note_id = rs.getLong("NOTE_ID");
+                for (String tag : note.TAGS()) {
+                    long tag_id = retrieveTagId(conn, note.COURSE_CODE(), tag);
+                    noteTagJunctionLinker(conn, note_id, tag_id);
+                }
             }
-
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "There was an exception inserting a note!", e);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "There was an exception converting a note to an input stream!", e);
         }
     }
 
@@ -129,14 +141,44 @@ public class DatabaseServiceHandler {
         testConnection();
     }
 
+    private Note formNoteFromResultSet(ResultSet rs, List<String> tags) throws SQLException {
+        if (rs.next()) {
+            String fileName = rs.getString("FILE_NAME");
+            Blob blob = rs.getBlob("FILE");
+            InputStream inputStream = blob.getBinaryStream();
+            try (FileOutputStream fis = new FileOutputStream("src/main/java/data/" + fileName)) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) > 0) {
+                    fis.write(buffer, 0, bytesRead);
+                }
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "There was an exception reading file!", e);
+            }
+
+            File file = new File("src/main/java/data/" + fileName);
+            file.deleteOnExit();
+            return new Note(
+                    rs.getString("USER_ID"),
+                    rs.getString("NOTE_TITLE"),
+                    rs.getString("COURSE_CODE"),
+                    rs.getDate("CREATED_AT").toInstant().atOffset(ZoneOffset.UTC),
+                    rs.getDate("UPDATED_AT").toInstant().atOffset(ZoneOffset.UTC),
+                    rs.getString("NOTE_SUMMARY"),
+                    file,
+                    fileName,
+                    tags
+            );
+        } else return null;
+    }
+
     public Note retrieveByNoteID(String noteID) {
-        Note retrievedNote;
         String statement = """
-                SELECT * FROM HIVENOTE_NOTE WHERE NOTE_ID = ?;
+                SELECT * FROM HIVENOTE_NOTE WHERE NOTE_ID = ?
                 """;
         String sqlStatement = """
                 SELECT t.TAG_NAME FROM HIVENOTE_TAG t\s
-                JOIN HIVENOTE_NOTE_TAG nt ON nt.TAG_ID = t.TAG_ID\s
+                JOIN NOTE_TAGS nt ON nt.TAG_ID = t.TAG_ID\s
                 WHERE nt.NOTE_ID = ? ORDER BY t.TAG_NAME
                 """;
         try (Connection conn = poolDataSource.getConnection()) {
@@ -149,18 +191,7 @@ public class DatabaseServiceHandler {
             }
             PreparedStatement ps = conn.prepareStatement(statement);
             ps.setString(1, noteID);
-            ResultSet rs = ps.executeQuery();
-            retrievedNote = new Note(
-                    rs.getString(2),
-                    rs.getString(3),
-                    rs.getString(4),
-                    rs.getString(5),
-                    rs.getDate(6).toInstant().atOffset(ZoneOffset.UTC),
-                    rs.getDate(7).toInstant().atOffset(ZoneOffset.UTC),
-                    (File) rs.getObject(8),
-                    tags
-            );
-            return retrievedNote;
+            return formNoteFromResultSet(ps.executeQuery(), tags);
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "There was an exception getting a note!", e);
         }

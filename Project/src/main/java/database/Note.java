@@ -7,25 +7,26 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 public record Note(String USER_ID,
-                   String TITLE,
+                   String NOTE_TITLE,
                    String COURSE_CODE,
-                   String NOTE_CONTENT,
                    OffsetDateTime CREATED_AT,
                    OffsetDateTime UPDATED_AT,
-                   File DOCUMENT_FILE,
+                   String NOTE_SUMMARY,
+                   File FILE,
+                   String FILE_NAME,
                    List<String> TAGS) {
     @NotNull
     @Override
     public String toString() {
         return String.format("""
-                Note: %s
-                Title: %s
-                User: %s
-                Course Code: %s
-                Summary: %s
-                Tags: %s
-                Created: %s
-                Updated: %s
-                """, DOCUMENT_FILE.getName(), TITLE, USER_ID, COURSE_CODE, NOTE_CONTENT, String.join(",", TAGS), CREATED_AT, UPDATED_AT);
+                USER_ID: %s
+                NOTE_TITLE: %s
+                COURSE_CODE: %s
+                CREATED_AT Code: %s
+                UPDATED_AT: %s
+                NOTE_SUMMARY: %s
+                FILE_NAME: %s
+                TAGS: %s
+                """, USER_ID, NOTE_TITLE, COURSE_CODE, CREATED_AT, UPDATED_AT, NOTE_SUMMARY, FILE_NAME, String.join(", ", TAGS));
     }
 }

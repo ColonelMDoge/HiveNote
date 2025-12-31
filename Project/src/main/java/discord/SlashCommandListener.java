@@ -66,7 +66,7 @@ public class SlashCommandListener extends ListenerAdapter {
                 return;
             }
 
-            Modal uploadModal = Modal.create("upload_modal", "Note Upload Details")
+            Modal uploadModal = Modal.create("upload_modal:" + course, "Note Upload Details")
                     .addComponents(
                             Label.of("Note File", AttachmentUpload.of("uploaded_note")),
                             Label.of("Title", TextInput.create("title", TextInputStyle.SHORT).build()),
@@ -77,23 +77,23 @@ public class SlashCommandListener extends ListenerAdapter {
         }
 
         if (event.getName().equals("create_tag")) {
-            String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString();
-            String tag = Objects.requireNonNull(event.getOption("created_tag")).getAsString();
+            String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString().toUpperCase();
+            String tag = Objects.requireNonNull(event.getOption("created_tag")).getAsString().toUpperCase();
             if (courseToTagLinker.courseCodeDNE(course)) {
                 event.reply("Course: \"" + course + "\" does not exist.").queue();
                 return;
             }
             if (courseToTagLinker.addTag(course, tag)) {
                 event.reply("Tag: \"" + tag + "\" has been created in course: \"" + course + "\".").queue();
-                dsh.insertTag(tag, course);
+                dsh.insertTag(course, tag);
             } else {
                 event.reply("Tag: \"" + tag + "\" does not exist in this course, or already exists.").queue();
             }
         }
 
         if (event.getName().equals("delete_tag")) {
-            String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString();
-            String tag = Objects.requireNonNull(event.getOption("deleted_tag")).getAsString();
+            String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString().toUpperCase();
+            String tag = Objects.requireNonNull(event.getOption("deleted_tag")).getAsString().toUpperCase();
             if (courseToTagLinker.courseCodeDNE(course)) {
                 event.reply("Course: \"" + course + "\" does not exist.").queue();
                 return;
@@ -107,7 +107,7 @@ public class SlashCommandListener extends ListenerAdapter {
         }
 
         if (event.getName().equals("create_course_code")) {
-            String course = Objects.requireNonNull(event.getOption("created_course")).getAsString();
+            String course = Objects.requireNonNull(event.getOption("created_course")).getAsString().toUpperCase();
             if (courseToTagLinker.addCourseCode(course)) {
                 event.reply("Course: \"" + course + "\" has been created.").queue();
             } else {
@@ -116,9 +116,9 @@ public class SlashCommandListener extends ListenerAdapter {
         }
 
         if (event.getName().equals("delete_course_code")) {
-            String course = Objects.requireNonNull(event.getOption("deleted_course")).getAsString();
+            String course = Objects.requireNonNull(event.getOption("deleted_course")).getAsString().toUpperCase();
             if (courseToTagLinker.removeCourseCode(course)) {
-                event.reply("Course: \"" + course + "\" has been deleted.").queue();
+                event.reply("Course: \"" + course + "\" and its associated tags has been deleted.").queue();
             } else {
                 event.reply("Course: \"" + course + "\" does not exist.").queue();
             }
@@ -130,7 +130,7 @@ public class SlashCommandListener extends ListenerAdapter {
             NoteEmbed embed = new NoteEmbed(note, jda);
             event.getChannel()
                     .sendMessageEmbeds(embed.build())
-                    .addFiles(FileUpload.fromData(note.DOCUMENT_FILE()))
+                    .addFiles(FileUpload.fromData(note.FILE()))
                     .queue();
         }
 

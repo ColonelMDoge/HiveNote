@@ -19,9 +19,9 @@ public class NoteEmbed extends EmbedBuilder {
     // Separate class to store the general embed of a note
     // This is so that this will not take up space in SlashCommandListener
     public NoteEmbed(Note note, JDA jda) {
-        this.setTitle(note.TITLE());
+        this.setTitle(note.NOTE_TITLE());
         this.setColor(new Color(235, 171, 0));
-        this.setDescription(note.NOTE_CONTENT());
+        this.setDescription(note.NOTE_SUMMARY());
         this.setAuthor(String.valueOf(jda.getUserById(note.USER_ID())));
         this.addField("Course:", note.COURSE_CODE(), true);
         this.addField("Author:", note.USER_ID(), true);
