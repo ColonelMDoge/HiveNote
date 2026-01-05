@@ -50,8 +50,22 @@ public class OnReadyListener extends ListenerAdapter {
                     Commands.slash("delete_course_code", "Delete a course code.")
                             .addOption(OptionType.STRING, "deleted_course", "Delete a course code that exists.", true),
 
-                    Commands.slash("retrieve_by_id", "Retrieve a note based on its database ID.")
-                            .addOption(OptionType.STRING, "provided_id", "Provided ID.", true)
+                    Commands.slash("retrieve_note_by_id", "Retrieve a note based on its database ID.")
+                            .addOption(OptionType.STRING, "provided_id", "Provided ID.", true),
+
+                    Commands.slash("retrieve_ids_by_filter", "Retrieve a list of IDs based on classifiers")
+                            .addOption(OptionType.STRING, "provided_course", "Required course code.", true)
+                            .addOption(OptionType.STRING, "provided_tag", "Optionally provided tag"),
+
+                    Commands.slash("generate_summary_by_id", "Request a summary of a note based on its database ID.")
+                            .addOption(OptionType.STRING, "provided_id", "Provided ID", true)
+                            .addOption(OptionType.STRING, "provided_prompt", "Optionally provided prompt (Default is a summary request.)"),
+
+                    Commands.slash("retrieve_course_codes", "Retrieve a list of all course codes."),
+
+                    Commands.slash("retrieve_tags_by_course", "Retrieve a list of all tags relating to a specific course.")
+                            .addOption(OptionType.STRING, "provided_course", "Required course code.", true)
+
             ).queue();
             courseToTagLinker.loadOnStartup();
             courseToTagLinker.saveOnShutDown();

@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -34,6 +35,14 @@ public class CourseToTagLinker implements Serializable {
             ssm.addOption(tag.toUpperCase(), tag.toUpperCase());
         }
         return ssm;
+    }
+
+    public Set<String> getTagsAsSet(String course) {
+        return courseToTag.get(course.toUpperCase());
+    }
+
+    public Set<String> getCoursesAsSet() {
+        return courseToTag.keySet();
     }
 
     public boolean addCourseCode(String code) {

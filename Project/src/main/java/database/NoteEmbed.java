@@ -7,6 +7,7 @@ import java.awt.*;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public class NoteEmbed extends EmbedBuilder {
     private static String formatTime(OffsetDateTime time) {
@@ -22,15 +23,15 @@ public class NoteEmbed extends EmbedBuilder {
         this.setTitle(note.NOTE_TITLE());
         this.setColor(new Color(235, 171, 0));
         this.setDescription(note.NOTE_SUMMARY());
-        this.setAuthor(String.valueOf(jda.getUserById(note.USER_ID())));
+        this.setThumbnail(Objects.requireNonNull(jda.getUserById(note.USER_ID())).getAvatarUrl());
         this.addField("Course:", note.COURSE_CODE(), true);
-        this.addField("Author:", note.USER_ID(), true);
+        this.addField("Author:", Objects.requireNonNull(jda.getUserById(note.USER_ID())).getName(), true);
         this.addField("Tags:", (note.TAGS() == null || note.TAGS().isEmpty())
                         ? "No applicable tags."
                         : String.join(", ", note.TAGS()), false
         );
         this.addField("Created At", formatTime(note.CREATED_AT()), true);
         this.addField("Updated At", formatTime(note.UPDATED_AT()), true);
-        this.setFooter("Retrieved from the HiveNote DB.");
+        this.setFooter("Retrieved from the HiveNote DB with an ID of: " + note.NOTE_ID());
     }
 }

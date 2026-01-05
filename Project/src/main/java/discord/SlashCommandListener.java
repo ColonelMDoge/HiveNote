@@ -16,18 +16,23 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.utils.FileUpload;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
 public class SlashCommandListener extends ListenerAdapter {
     private final Logger logger = LoggerUtil.getLogger(SlashCommandListener.class);
+    private final AISummaryService aiSummaryService = new AISummaryService();
     private final EmbedBuilder embedBuilder = new BotDescription();
     private final LatexConverter latexConverter = new LatexConverter();
     private final CourseToTagLinker courseToTagLinker;
@@ -51,7 +56,7 @@ public class SlashCommandListener extends ListenerAdapter {
             return;
         }
         logger.info(String.format("A(n) \"%s\" slash command interaction was received from: %s.", event.getName(), event.getUser().getName()));
-        if (event.getName().equals("upload")) {
+        if (event.getName().equals("upload_note")) {
             String course = Objects.requireNonNull(event.getOption("asked_course")).getAsString().toUpperCase();
             if (courseToTagLinker.isEmpty()) {
                 event.reply("There are no existing courses yet.").queue();
@@ -117,21 +122,103 @@ public class SlashCommandListener extends ListenerAdapter {
 
         if (event.getName().equals("delete_course_code")) {
             String course = Objects.requireNonNull(event.getOption("deleted_course")).getAsString().toUpperCase();
+
+            if (courseToTagLinker.courseCodeDNE(course)) {
+                event.reply("Course: \"" + course + "\" does not exist.").queue();
+            }
+            for (String tag : courseToTagLinker.getTagsAsSet(course)) {
+                dsh.dropTag(course, tag);
+            }
             if (courseToTagLinker.removeCourseCode(course)) {
                 event.reply("Course: \"" + course + "\" and its associated tags has been deleted.").queue();
             } else {
-                event.reply("Course: \"" + course + "\" does not exist.").queue();
+                event.reply("There was a problem deleting the course: \"" + course + "\"").queue();
             }
         }
 
-        if (event.getName().equals("retrieve_by_id")) {
+        if (event.getName().equals("retrieve_note_by_id")) {
+            event.deferReply().queue();
             String id = Objects.requireNonNull(event.getOption("provided_id")).getAsString();
             Note note = dsh.retrieveByNoteID(id);
+            if (note == null) {
+                event.getHook().sendMessage("There is no note associated with id of: " + id).queue();
+                return;
+            }
             NoteEmbed embed = new NoteEmbed(note, jda);
-            event.getChannel()
-                    .sendMessageEmbeds(embed.build())
-                    .addFiles(FileUpload.fromData(note.FILE()))
-                    .queue();
+            event.getHook().sendMessageEmbeds(embed.build())
+                    .addFiles(FileUpload.fromData(note.FILE_BLOB(), note.FILE_NAME()))
+                    .queue(success -> success.delete().queueAfter(1, TimeUnit.MINUTES));
+        }
+
+        if(event.getName().equals("retrieve_ids_by_filter")) {
+            event.deferReply().queue(hook -> {
+                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
+                CompletableFuture.runAsync(() -> {
+                    EmbedBuilder ids;
+                    String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString().toUpperCase();
+                    OptionMapping om = event.getOption("provided_tag");
+                    if (om == null || om.getAsString().isEmpty()) {
+                        ids = dsh.retrieveIDByCourseAndTag(course, null);
+                    } else {
+                        ids = dsh.retrieveIDByCourseAndTag(course, om.getAsString().toUpperCase());
+                    }
+                    if (ids.isEmpty()) {
+                        hook.sendMessage("There are no note IDs that matched your request.").queue();
+                        return;
+                    }
+                    hook.sendMessageEmbeds(ids.build()).queue();
+                });
+            });
+        }
+
+        if (event.getName().equals("generate_summary_by_id")) {
+            event.deferReply().queue(hook -> {
+                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        String id = Objects.requireNonNull(event.getOption("provided_id")).getAsString();
+                        String prompt = Objects.requireNonNull(event.getOption("provided_prompt")).getAsString();
+                        byte[] data = dsh.retrieveBlob(id);
+                        if (data == null) {
+                            hook.sendMessage("There is no data associated with id of: " + id).queue();
+                            return;
+                        }
+                        String message = aiSummaryService.generateSummary(prompt, data);
+                        sendMessages(hook.getInteraction().getMessageChannel(), latexConverter.extractLatexFromString(message));
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "Failed to generate summary.", e);
+                        hook.sendMessage("An error occurred while generating the summary.").queue();
+                    }
+                });
+            });
+
+        }
+
+        if (event.getName().equals("retrieve_course_codes")) {
+            EmbedBuilder embed = new  EmbedBuilder();
+            embed.setTitle("All Available Courses");
+            embed.setColor(new Color(235, 171, 0));
+            StringBuilder sb = new StringBuilder();
+            courseToTagLinker.getCoursesAsSet().stream().sorted().forEach(
+                    course -> sb.append("``").append(course).append("``").append("\n"));
+            embed.addField("Available courses:", sb.toString(), true);
+            event.replyEmbeds(embed.build()).queue();
+        }
+
+        if (event.getName().equals("retrieve_tags_by_course")){
+            String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString().toUpperCase();
+            if (courseToTagLinker.courseCodeDNE(course)) {
+                event.reply("Provided course code does not exist.").queue();
+                return;
+            }
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.setTitle("Tags corresponding to " + course);
+            embed.setColor(new Color(235, 171, 0));
+            StringBuilder sb = new StringBuilder();
+            courseToTagLinker.getTagsAsSet(course).stream().sorted().forEach(
+                    tag -> sb.append("``").append(tag).append("``").append("\n"));
+            embed.addField("Available tags relating to the provided course:", sb.toString(), true);
+            event.replyEmbeds(embed.build()).queue();
         }
 
         if (event.getName().equals("help")) {
@@ -140,10 +227,15 @@ public class SlashCommandListener extends ListenerAdapter {
 
         if (event.getName().equals("ask")) {
             event.reply("Processing your request...").setEphemeral(true).queue(hook ->
-                    hook.deleteOriginal().queue()
+                    hook.deleteOriginal().queueAfter(5, TimeUnit.SECONDS)
             );
-            String returnedMessage = AISummaryService.generateResponse(Objects.requireNonNull(event.getOption("asked_prompt")).getAsString());
-            sendMessages(event.getMessageChannel(), latexConverter.extractLatexFromString(returnedMessage));
+            try {
+                String returnedMessage = aiSummaryService.generateResponse(Objects.requireNonNull(event.getOption("asked_prompt")).getAsString());
+                sendMessages(event.getMessageChannel(), latexConverter.extractLatexFromString(returnedMessage));
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Failed to generate response.", e);
+                event.reply("An error occurred while generating the response.").queue();
+            }
         }
     }
 

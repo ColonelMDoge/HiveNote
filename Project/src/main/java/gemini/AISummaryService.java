@@ -5,23 +5,44 @@ import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
+import logging.LoggerUtil;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URLConnection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AISummaryService {
-    private static final String MODEL_NAME = "gemini-2.5-flash-lite";
-    private static final String SYSTEM_INSTRUCTION = "You are a Discord Bot named HiveNote.";
-    public static String generateResponse(String prompt) {
+    private final Logger logger = LoggerUtil.getLogger(AISummaryService.class);
+    final String MODEL_NAME = "gemini-2.5-flash-lite";
+    final String SYSTEM_INSTRUCTION = "You are a Discord Bot named HiveNote.";
+    final GenerateContentConfig config = GenerateContentConfig
+            .builder()
+            .systemInstruction(Content.fromParts(Part.fromText(SYSTEM_INSTRUCTION)))
+            .build();
+    public String generateResponse(String prompt) {
         GenerateContentResponse response;
         try (Client client = new Client()) {
-            GenerateContentConfig config = GenerateContentConfig
-                    .builder()
-                    .systemInstruction(Content.fromParts(Part.fromText(SYSTEM_INSTRUCTION)))
-                    .build();
-            response = client.models.generateContent(
-                    MODEL_NAME,
-                    prompt,
-                    config);
+            response = client.models.generateContent(MODEL_NAME, prompt, config);
+            return response.text();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Failed to generate a response!", e);
         }
-        return response.text();
+        return null;
+    }
+    public String generateSummary(String prompt, byte[] data) {
+        GenerateContentResponse response;
+        try (Client client = new Client()) {
+            Content content = Content.fromParts(
+                    Part.fromText(prompt),
+                    Part.fromBytes(data, URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(data))));
+            response = client.models.generateContent(MODEL_NAME, content, config);
+            return response.text();
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Failed to generate a summary!", e);
+        }
+        return null;
     }
 }
 
