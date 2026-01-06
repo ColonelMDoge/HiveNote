@@ -132,13 +132,13 @@ public class DatabaseServiceHandler {
         }
     }
 
-    public byte[] retrieveBlob(String id) {
+    public byte[] retrieveBlob(long noteID) {
         String statement = """
                 SELECT FILE_BLOB FROM HIVENOTE_NOTE WHERE NOTE_ID = ?
                 """;
         try (Connection conn = getPoolDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(statement)) {
-            ps.setString(1, id);
+            ps.setLong(1, noteID);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getBytes(1);
@@ -216,7 +216,7 @@ public class DatabaseServiceHandler {
         return null;
     }
 
-    public Note retrieveByNoteID(String noteID) {
+    public Note retrieveByNoteID(long noteID) {
         String statement = """
                 SELECT * FROM HIVENOTE_NOTE WHERE NOTE_ID = ?
                 """;
@@ -229,17 +229,72 @@ public class DatabaseServiceHandler {
              PreparedStatement sql = conn.prepareStatement(sqlStatement)) {
             List<String> tags = new ArrayList<>();
 
-            sql.setString(1, noteID);
+            sql.setLong(1, noteID);
             ResultSet sqlRS = sql.executeQuery();
             while (sqlRS.next()) {
                 tags.add(sqlRS.getString(1));
             }
             PreparedStatement ps = conn.prepareStatement(statement);
-            ps.setString(1, noteID);
+            ps.setLong(1, noteID);
             return formNoteFromResultSet(ps.executeQuery(), tags);
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "There was an exception getting a note!", e);
         }
         return null;
+    }
+
+    public boolean changeTitle(long noteID, String newTitle) {
+        String statement = """
+                UPDATE HIVENOTE_NOTE SET NOTE_TITLE = ?, UPDATED_AT = ? WHERE NOTE_ID = ?
+                """;
+        try (Connection conn = getPoolDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement)) {
+            ps.setString(1, newTitle);
+            ps.setTimestamp(2, Timestamp.from(Instant.now()));
+            ps.setLong(3, noteID);
+            ps.executeUpdate();
+            logger.info("Title successfully updated.");
+            return true;
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "There was a problem updating the title of a note!", e);
+        }
+        return false;
+    }
+
+    public boolean changeSummary(long noteID, String newSummary) {
+        String statement = """
+                UPDATE HIVENOTE_NOTE SET NOTE_SUMMARY = ?, UPDATED_AT = ? WHERE NOTE_ID = ?
+                """;
+        try (Connection conn = getPoolDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement)) {
+            ps.setString(1, newSummary);
+            ps.setTimestamp(2, Timestamp.from(Instant.now()));
+            ps.setLong(3, noteID);
+            ps.executeUpdate();
+            logger.info("Summary successfully updated.");
+            return true;
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "There was a problem updating the summary of a note!", e);
+        }
+        return false;
+    }
+
+    public boolean changeFile(long noteID, byte[] newFile, String newFileName) {
+        String statement = """
+                UPDATE HIVENOTE_NOTE SET FILE_BLOB = ?, FILE_NAME = ?, UPDATED_AT = ? WHERE NOTE_ID = ?
+                """;
+        try (Connection conn = getPoolDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement)) {
+            ps.setBytes(1, newFile);
+            ps.setString(2, newFileName);
+            ps.setTimestamp(3, Timestamp.from(Instant.now()));
+            ps.setLong(4, noteID);
+            ps.executeUpdate();
+            logger.info("File successfully updated.");
+            return true;
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "There was a problem updating the file of a note!", e);
+        }
+        return false;
     }
 }
