@@ -41,6 +41,15 @@ public class DatabaseServiceHandler {
         return poolDataSource;
     }
 
+    public boolean testConnection() {
+        try (Connection conn = getPoolDataSource().getConnection()) {
+            return conn.isValid(5);
+        } catch (SQLException ex) {
+            logger.severe("Could not connect to database: " + ex.getMessage());
+            return false;
+        }
+    }
+
     public void insertTag(String course, String tag) {
         String statement = """
                 INSERT INTO HIVENOTE_TAG (TAG_NAME, COURSE_CODE) VALUES (?, ?)

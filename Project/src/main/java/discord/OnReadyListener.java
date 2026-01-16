@@ -1,5 +1,6 @@
 package discord;
 
+import database.DatabaseServiceHandler;
 import logging.LoggerUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -7,6 +8,7 @@ import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.logging.Logger;
@@ -15,13 +17,20 @@ public class OnReadyListener extends ListenerAdapter {
     private final Logger logger = LoggerUtil.getLogger(OnReadyListener.class);
     private final CourseToTagLinker courseToTagLinker;
     private final SlashCommandListener slashCommandListener;
+    private final DatabaseServiceHandler dsh = new DatabaseServiceHandler();
 
     public OnReadyListener(CourseToTagLinker courseToTagLinker, SlashCommandListener slashCommandListener) {
         this.courseToTagLinker = courseToTagLinker;
         this.slashCommandListener = slashCommandListener;
     }
 
-    public void onReady(ReadyEvent event) {
+    public void onReady(@NotNull ReadyEvent event) {
+        if (dsh.testConnection()) {
+            logger.info("Connected to the HiveNote database.");
+        } else {
+            throw new RuntimeException("Could not connect to the HiveNote database.");
+        }
+
         logger.info("The Discord bot is ready.");
         JDA jda = event.getJDA();
         slashCommandListener.setJDA(jda);
