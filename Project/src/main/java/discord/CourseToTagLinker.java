@@ -31,9 +31,13 @@ public class CourseToTagLinker implements Serializable {
     public StringSelectMenu.Builder getTagsAsSSM(String course) {
         StringSelectMenu.Builder ssm = StringSelectMenu.create(course.toUpperCase() + "_tags")
                 .setRequiredRange(1, StringSelectMenu.OPTIONS_MAX_AMOUNT);
-        for (String tag : courseToTag.get(course.toUpperCase())) {
-            ssm.addOption(tag.toUpperCase(), tag.toUpperCase());
-        }
+        courseToTag.get(course.toUpperCase()).forEach(tag -> ssm.addOption(tag.toUpperCase(), tag.toUpperCase()));
+        return ssm;
+    }
+
+    public StringSelectMenu.Builder getCoursesAsSSM() {
+        StringSelectMenu.Builder ssm = StringSelectMenu.create("courses");
+        courseToTag.keySet().stream().sorted().forEach(code -> ssm.addOption(code.toUpperCase(), code.toUpperCase()));
         return ssm;
     }
 

@@ -172,14 +172,11 @@ public class SlashCommandListener extends ListenerAdapter {
                 return;
             }
 
-            Modal uploadModal = Modal.create("upload_modal:" + course, "Note Upload Details")
+            Modal obtainCourse = Modal.create("obtain_course", "Course Code")
                     .addComponents(
-                            Label.of("Note File", AttachmentUpload.of("uploaded_note")),
-                            Label.of("Title", TextInput.create("title", TextInputStyle.SHORT).build()),
-                            Label.of("Summary", TextInput.create("summary", TextInputStyle.SHORT).build()),
-                            Label.of("Tags", courseToTagLinker.getTagsAsSSM(course).build())
+                            Label.of("Available Course Codes", courseToTagLinker.getCoursesAsSSM().build())
                     ).build();
-            event.replyModal(uploadModal).queue();
+            event.replyModal(obtainCourse).queue();
         }
 
         if (event.getName().equals("retrieve_note_by_id")) {

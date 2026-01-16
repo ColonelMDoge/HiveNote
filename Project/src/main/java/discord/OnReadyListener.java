@@ -65,7 +65,7 @@ public class OnReadyListener extends ListenerAdapter {
                             .addOption(OptionType.STRING, "deleted_course", "Delete a course code that exists.", true),
 
                     // Database related commands
-                    Commands.slash("upload", "Upload a file to the database.")
+                    Commands.slash("upload_note", "Upload a file to the database.")
                             .addOption(OptionType.STRING, "asked_course", "Course code related to file.", true),
 
                     Commands.slash("retrieve_note_by_id", "Retrieve a note based on its database ID.")
