@@ -58,10 +58,11 @@ public class OnReadyListener extends ListenerAdapter {
                             .addOption(OptionType.STRING, "provided_course", "Course code relating to the tag.", true)
                             .addOption(OptionType.STRING, "deleted_tag", "Delete a tag that exists.", true),
 
-                    Commands.slash("create_course_code", "Create a course code.")
-                            .addOption(OptionType.STRING, "created_course", "Course code you want to create.", true),
+                    Commands.slash("create_course", "Create a course code.")
+                            .addOption(OptionType.STRING, "created_course", "Course code you want to create.", true)
+                            .addOption(OptionType.STRING, "provided_name", "The name of the course.", true),
 
-                    Commands.slash("delete_course_code", "Delete a course code.")
+                    Commands.slash("delete_course", "Delete a course code.")
                             .addOption(OptionType.STRING, "deleted_course", "Delete a course code that exists.", true),
 
                     // Database related commands
@@ -93,7 +94,7 @@ public class OnReadyListener extends ListenerAdapter {
                             .addOption(OptionType.STRING, "provided_prompt", "Optionally provided prompt (Default is a summary request.)")
             ).queue();
             courseToTagLinker.loadOnStartup();
-            courseToTagLinker.saveOnShutDown();
+            //courseToTagLinker.saveOnShutDown();
         }
     }
 }

@@ -20,20 +20,9 @@ import java.util.logging.Logger;
 
 public class ModalListener extends ListenerAdapter {
     private final DatabaseServiceHandler dsh = new DatabaseServiceHandler();
-    private final CourseToTagLinker courseToTagLinker = new CourseToTagLinker();
     private final Logger logger = LoggerUtil.getLogger(ModalListener.class);
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
         String course = event.getModalId().split(":")[1].toUpperCase();
-        if (event.getModalId().equals("obtain_course")) {
-            Modal uploadModal = Modal.create("upload_modal:" + course, "Note Upload Details")
-                    .addComponents(
-                            Label.of("Attachments", AttachmentUpload.create("uploaded_note").setRequiredRange(1,10).build()),
-                            Label.of("Title", TextInput.create("title", TextInputStyle.SHORT).build()),
-                            Label.of("Summary", TextInput.create("summary", TextInputStyle.SHORT).build()),
-                            Label.of("Tags", courseToTagLinker.getTagsAsSSM(course).build())
-                    ).build();
-            event.replyModal(uploadModal).queue();
-        }
         if (event.getModalId().startsWith("upload_modal:")) {
             event.deferReply().queue();
             logger.info("Upload modal event has been triggered.");

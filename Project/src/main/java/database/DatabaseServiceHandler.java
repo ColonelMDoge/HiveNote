@@ -50,15 +50,44 @@ public class DatabaseServiceHandler {
         }
     }
 
-    public void insertTag(String course, String tag) {
+    public void insertCourse(String course, String name) {
         String statement = """
-                INSERT INTO HIVENOTE_TAG (TAG_NAME, COURSE_CODE) VALUES (?, ?)
+                INSERT INTO COURSE (COURSE_CODE, COURSE_NAME) VALUES (?, ?)
+                """;
+        try (Connection conn = poolDataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(statement)) {
+            ps.setString(1, course.toUpperCase());
+            ps.setString(2, name);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "There was an exception inserting a course!", e);
+        }
+    }
+
+    public void dropCourse(String course) {
+        String statement = """
+                DELETE FROM COURSE WHERE COURSE_CODE = ?;
+                """;
+        try (Connection conn = getPoolDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement)) {
+            ps.setString(1, course.toUpperCase());
+            ps.executeUpdate();
+            logger.info(String.format("Dropped course: %s from the database", course.toUpperCase()));
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "There was an exception deleting a course!", e);
+        }
+    }
+
+    public void insertTag(long course_code, String tag) {
+        String statement = """
+                INSERT INTO TAG (TAG_NAME, COURSE_ID)
+                SELECT ?, c.COURSE_ID FROM COURSE c
+                WHERE c.COURSE_CODE = ?
                 """;
         try (Connection conn = getPoolDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(1, tag.toUpperCase());
-                ps.setString(2, course.toUpperCase());
-                ps.executeUpdate();
-                logger.info(String.format("Inserted tag: \"%s\" with course code: \"%s\" into the database.", tag.toUpperCase(), course.toUpperCase()));
+            ps.setString(1, tag.toUpperCase());
+            ps.setString(2, course.toUpperCase());
+            ps.executeUpdate();
+            logger.info(String.format("Inserted tag: \"%s\" with course code: \"%s\" into the database.", tag.toUpperCase(), course.toUpperCase()));
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "There was an exception inserting a tag!", e);
         }

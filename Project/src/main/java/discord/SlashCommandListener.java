@@ -132,16 +132,18 @@ public class SlashCommandListener extends ListenerAdapter {
             }
         }
 
-        if (event.getName().equals("create_course_code")) {
+        if (event.getName().equals("create_course")) {
             String course = Objects.requireNonNull(event.getOption("created_course")).getAsString().toUpperCase();
+            String name = Objects.requireNonNull(event.getOption("provided_name")).getAsString();
             if (courseToTagLinker.addCourseCode(course)) {
                 event.reply("Course: \"" + course + "\" has been created.").queue();
+                dsh.insertCourse(course, name);
             } else {
                 event.reply("Tag: \"" + course + "\" already exists.").queue();
             }
         }
 
-        if (event.getName().equals("delete_course_code")) {
+        if (event.getName().equals("delete_course")) {
             String course = Objects.requireNonNull(event.getOption("deleted_course")).getAsString().toUpperCase();
 
             if (courseToTagLinker.courseCodeDNE(course)) {
@@ -152,6 +154,7 @@ public class SlashCommandListener extends ListenerAdapter {
             }
             if (courseToTagLinker.removeCourseCode(course)) {
                 event.reply("Course: \"" + course + "\" and its associated tags has been deleted.").queue();
+                dsh.dropCourse(course);
             } else {
                 event.reply("There was a problem deleting the course: \"" + course + "\"").queue();
             }
@@ -172,11 +175,14 @@ public class SlashCommandListener extends ListenerAdapter {
                 return;
             }
 
-            Modal obtainCourse = Modal.create("obtain_course", "Course Code")
+            Modal uploadModal = Modal.create("upload_modal:" + course, "Note Upload Details")
                     .addComponents(
-                            Label.of("Available Course Codes", courseToTagLinker.getCoursesAsSSM().build())
+                            Label.of("Attachments", AttachmentUpload.create("uploaded_note").setRequiredRange(1,10).build()),
+                            Label.of("Title", TextInput.create("title", TextInputStyle.SHORT).build()),
+                            Label.of("Summary", TextInput.create("summary", TextInputStyle.SHORT).build()),
+                            Label.of("Tags", courseToTagLinker.getTagsAsSSM(course).build())
                     ).build();
-            event.replyModal(obtainCourse).queue();
+            event.replyModal(uploadModal).queue();
         }
 
         if (event.getName().equals("retrieve_note_by_id")) {

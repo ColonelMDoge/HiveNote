@@ -97,7 +97,8 @@ public class CourseToTagLinker implements Serializable {
             if (courseToTag == null) courseToTag = new HashMap<>();
             logger.info("Course and tag contents successfully loaded to map object.");
         } catch (IOException | ClassNotFoundException e) {
-            logger.log(Level.SEVERE, "There was an error attempting to load the serialized file!", e);
+            logger.log(Level.WARNING, "There was an error attempting to load the serialized file!", e);
+            courseToTag = new HashMap<>();
         }
     }
 }
