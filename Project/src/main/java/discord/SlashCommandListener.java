@@ -1,9 +1,6 @@
 package discord;
 
-import database.AttachmentConvertor;
-import database.DatabaseServiceHandler;
-import database.Note;
-import database.NoteEmbed;
+import database.*;
 import gemini.AISummaryService;
 import latex.LatexConverter;
 import logging.LoggerUtil;
@@ -24,6 +21,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -80,6 +78,10 @@ public class SlashCommandListener extends ListenerAdapter {
             embed.setTitle("All Available Courses");
             embed.setColor(new Color(235, 171, 0));
             StringBuilder sb = new StringBuilder();
+            if (courseToTagLinker.getCoursesAsSet().isEmpty()) {
+                event.reply("There are no course codes yet.").queue();
+                return;
+            }
             courseToTagLinker.getCoursesAsSet().stream().sorted().forEach(
                     course -> sb.append("``").append(course).append("``").append("\n"));
             embed.addField("Available courses:", sb.toString(), true);
@@ -92,6 +94,12 @@ public class SlashCommandListener extends ListenerAdapter {
                 event.reply("Provided course code does not exist.").queue();
                 return;
             }
+
+            if (courseToTagLinker.getTagsAsSet(course).isEmpty()) {
+                event.reply("Provided course code has no tags yet.").queue();
+                return;
+            }
+
             EmbedBuilder embed = new EmbedBuilder();
             embed.setTitle("Tags corresponding to " + course);
             embed.setColor(new Color(235, 171, 0));
@@ -105,13 +113,9 @@ public class SlashCommandListener extends ListenerAdapter {
         if (event.getName().equals("create_tag")) {
             String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString().toUpperCase();
             String tag = Objects.requireNonNull(event.getOption("created_tag")).getAsString().toUpperCase();
-            if (courseToTagLinker.courseCodeDNE(course)) {
-                event.reply("Course: \"" + course + "\" does not exist.").queue();
-                return;
-            }
-            if (courseToTagLinker.addTag(course, tag)) {
+            if (dsh.insertTag(course, tag)) {
+                courseToTagLinker.addTag(course, tag);
                 event.reply("Tag: \"" + tag + "\" has been created in course: \"" + course + "\".").queue();
-                dsh.insertTag(course, tag);
             } else {
                 event.reply("Tag: \"" + tag + "\" does not exist in this course, or already exists.").queue();
             }
@@ -120,13 +124,9 @@ public class SlashCommandListener extends ListenerAdapter {
         if (event.getName().equals("delete_tag")) {
             String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString().toUpperCase();
             String tag = Objects.requireNonNull(event.getOption("deleted_tag")).getAsString().toUpperCase();
-            if (courseToTagLinker.courseCodeDNE(course)) {
-                event.reply("Course: \"" + course + "\" does not exist.").queue();
-                return;
-            }
-            if (courseToTagLinker.removeTag(course, tag)) {
+            if (dsh.dropTag(course, tag)) {
+                courseToTagLinker.removeTag(course, tag);
                 event.reply("Tag: \"" + tag + "\" has been deleted.").queue();
-                dsh.dropTag(course, tag);
             } else {
                 event.reply("Tag: \"" + tag + "\" does not exist in this course, or already exists.").queue();
             }
@@ -135,9 +135,9 @@ public class SlashCommandListener extends ListenerAdapter {
         if (event.getName().equals("create_course")) {
             String course = Objects.requireNonNull(event.getOption("created_course")).getAsString().toUpperCase();
             String name = Objects.requireNonNull(event.getOption("provided_name")).getAsString();
-            if (courseToTagLinker.addCourseCode(course)) {
+            if (dsh.insertCourse(course, name)) {
+                courseToTagLinker.addCourseCode(course);
                 event.reply("Course: \"" + course + "\" has been created.").queue();
-                dsh.insertCourse(course, name);
             } else {
                 event.reply("Tag: \"" + course + "\" already exists.").queue();
             }
@@ -145,24 +145,17 @@ public class SlashCommandListener extends ListenerAdapter {
 
         if (event.getName().equals("delete_course")) {
             String course = Objects.requireNonNull(event.getOption("deleted_course")).getAsString().toUpperCase();
-
-            if (courseToTagLinker.courseCodeDNE(course)) {
-                event.reply("Course: \"" + course + "\" does not exist.").queue();
-            }
-            for (String tag : courseToTagLinker.getTagsAsSet(course)) {
-                dsh.dropTag(course, tag);
-            }
-            if (courseToTagLinker.removeCourseCode(course)) {
+            if (dsh.dropCourse(course)) {
+                courseToTagLinker.removeCourseCode(course);
                 event.reply("Course: \"" + course + "\" and its associated tags has been deleted.").queue();
-                dsh.dropCourse(course);
             } else {
-                event.reply("There was a problem deleting the course: \"" + course + "\"").queue();
+                event.reply("Course: \"" + course + "\" does not exist.").queue();
             }
         }
 
         if (event.getName().equals("upload_note")) {
             String course = Objects.requireNonNull(event.getOption("asked_course")).getAsString().toUpperCase();
-            if (courseToTagLinker.isEmpty()) {
+            if (courseToTagLinker.getCoursesAsSet().isEmpty()) {
                 event.reply("There are no existing courses yet.").queue();
                 return;
             }
@@ -194,8 +187,12 @@ public class SlashCommandListener extends ListenerAdapter {
                 return;
             }
             NoteEmbed embed = new NoteEmbed(note, jda);
+            List<FileUpload> uploads = new ArrayList<>();
+            for (Attachment attachment : note.ATTACHMENTS()) {
+                uploads.add(FileUpload.fromData(attachment.data(), attachment.fileName()));
+            }
             event.getHook().sendMessageEmbeds(embed.build())
-                    .addFiles(FileUpload.fromData(note.FILE_BLOB(), note.FILE_NAME()))
+                    .addFiles(uploads)
                     .queue(success -> success.delete().queueAfter(1, TimeUnit.MINUTES));
         }
 

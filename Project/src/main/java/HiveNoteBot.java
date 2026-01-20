@@ -16,7 +16,7 @@ public class HiveNoteBot {
     }
     private static final CourseToTagLinker courseToTagLinker = new CourseToTagLinker();
     private static final SlashCommandListener slashCommandListener = new SlashCommandListener(courseToTagLinker);
-    private static final OnReadyListener onReadyListener = new OnReadyListener(courseToTagLinker, slashCommandListener);
+    private static final OnReadyListener onReadyListener = new OnReadyListener(slashCommandListener);
     public static void main(String[] args) {
         final String TOKEN = System.getenv("JDA_TOKEN");
         System.setProperty("java.util.logging.manager", LoggerUtil.MyLogManager.class.getName());

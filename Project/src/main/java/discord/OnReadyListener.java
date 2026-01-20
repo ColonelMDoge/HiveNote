@@ -10,17 +10,14 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
 import java.util.logging.Logger;
 
 public class OnReadyListener extends ListenerAdapter {
     private final Logger logger = LoggerUtil.getLogger(OnReadyListener.class);
-    private final CourseToTagLinker courseToTagLinker;
     private final SlashCommandListener slashCommandListener;
     private final DatabaseServiceHandler dsh = new DatabaseServiceHandler();
 
-    public OnReadyListener(CourseToTagLinker courseToTagLinker, SlashCommandListener slashCommandListener) {
-        this.courseToTagLinker = courseToTagLinker;
+    public OnReadyListener(SlashCommandListener slashCommandListener) {
         this.slashCommandListener = slashCommandListener;
     }
 
@@ -93,8 +90,6 @@ public class OnReadyListener extends ListenerAdapter {
                             .addOption(OptionType.INTEGER, "provided_id", "Provided ID", true)
                             .addOption(OptionType.STRING, "provided_prompt", "Optionally provided prompt (Default is a summary request.)")
             ).queue();
-            courseToTagLinker.loadOnStartup();
-            //courseToTagLinker.saveOnShutDown();
         }
     }
 }
