@@ -1,20 +1,2 @@
-2026-01-19 21:28:16 [INFO] logging.LoggerUtil.setupLogging: Logging started. 
-2026-01-19 21:28:16 [INFO] database.DatabaseServiceHandler.getPoolDataSource: PoolDataSource created. 
-2026-01-19 21:28:18 [INFO] database.DatabaseServiceHandler.preLoadData: Preloading data complete. 
-2026-01-19 21:28:20 [INFO] discord.OnReadyListener.onReady: Connected to the HiveNote database. 
-2026-01-19 21:28:20 [INFO] discord.OnReadyListener.onReady: The Discord bot is ready. 
-2026-01-19 21:28:24 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "upload_note" slash command interaction was received from: colonelmdoge. 
-2026-01-19 21:29:05 [INFO] discord.ModalListener.onModalInteraction: Upload modal event has been triggered. 
-2026-01-19 21:29:05 [INFO] database.AttachmentConvertor.lambda$convertToBytes$0: Attachment successfully converted to a byte array 
-2026-01-19 21:29:06 [INFO] database.AttachmentConvertor.lambda$convertToBytes$0: Attachment successfully converted to a byte array 
-2026-01-19 21:29:06 [INFO] database.AttachmentConvertor.lambda$convertToBytes$0: Attachment successfully converted to a byte array 
-2026-01-19 21:29:06 [INFO] database.AttachmentConvertor.lambda$convertToBytes$0: Attachment successfully converted to a byte array 
-2026-01-19 21:29:06 [INFO] database.AttachmentConvertor.lambda$convertToBytes$0: Attachment successfully converted to a byte array 
-2026-01-19 21:29:06 [INFO] database.AttachmentConvertor.lambda$convertToBytes$0: Attachment successfully converted to a byte array 
-2026-01-19 21:29:06 [INFO] discord.ModalListener.onModalInteraction: Note has been successfully created. 
-2026-01-19 21:29:07 [INFO] database.DatabaseServiceHandler.retrieveTagId: Retrieved tag "TESTTAG1" with corresponding course "TESTCOURSE" and an ID of 81 
-2026-01-19 21:29:07 [INFO] database.DatabaseServiceHandler.noteTagJunctionLinker: Successfully linked note ID 42 to tag ID 81 
-2026-01-19 21:29:08 [INFO] database.DatabaseServiceHandler.uploadToDB: Note successfully uploaded to the database. 
-2026-01-19 21:29:32 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "retrieve_note_by_id" slash command interaction was received from: colonelmdoge. 
-2026-01-19 21:31:32 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "retrieve_note_by_id" slash command interaction was received from: colonelmdoge. 
-2026-01-19 21:31:44 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "retrieve_note_by_id" slash command interaction was received from: frenchfriesandgravy. 
+2026-01-20 22:15:56 [INFO] logging.LoggerUtil.setupLogging: Logging started. 
+2026-01-20 22:15:57 [INFO] database.DatabaseServiceHandler.getPoolDataSource: PoolDataSource created. 

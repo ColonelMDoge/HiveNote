@@ -150,6 +150,24 @@ public class DatabaseServiceHandler {
         return false;
     }
 
+    public String retrieveCourseCodeById(long noteID) {
+        String statement = """
+                SELECT c.COURSE_CODE FROM COURSE c
+                JOIN NOTE n ON n.COURSE_ID = c.COURSE_ID
+                WHERE n.NOTE_ID = ?
+                """;
+        try (Connection conn = getPoolDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement)) {
+            ps.setLong(1, noteID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString(1);
+                return null;
+            }
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "There was an exception retrieving a course code from note ID!", e);
+        }
+        return null;
+    }
     private void noteTagJunctionLinker(Connection conn, long note_id, long tag_id) throws SQLException {
         String statement = """
                 INSERT INTO NOTE_TAG_JUNCTION (NOTE_ID, TAG_ID) VALUES (?,?)

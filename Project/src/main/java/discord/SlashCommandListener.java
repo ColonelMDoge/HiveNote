@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.components.attachmentupload.AttachmentUpload;
 import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Message;
@@ -45,6 +46,12 @@ public class SlashCommandListener extends ListenerAdapter {
 
     public void setJDA(JDA jda) {
         this.jda = jda;
+    }
+
+    private StringSelectMenu createToggle(String ID, String prompt) {
+        return StringSelectMenu.create(ID).addOption(prompt, "YES")
+                .setRequiredRange(0,1)
+                .build();
     }
 
     @Override
@@ -217,50 +224,70 @@ public class SlashCommandListener extends ListenerAdapter {
             });
         }
 
-        if (event.getName().equals("change_note_title")) {
-            event.deferReply().queue(hook -> {
-                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
-                long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
-                String newTitle = Objects.requireNonNull(event.getOption("provided_title")).getAsString();
-                CompletableFuture.runAsync(() -> {
-                    if (dsh.changeTitle(noteID, newTitle)) {
-                        hook.sendMessage("Successfully changed the title of note: " + noteID + " to: " + newTitle).queue();
-                    } else {
-                        hook.sendMessage("Could not change the title of the note!").queue();
-                    }
-                });
-            });
+        if (event.getName().equals("modify_note")) {
+            long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
+            String course = dsh.retrieveCourseCodeById(noteID);
+            if (course == null) {
+                event.reply("No note exists with provided ID.").queue();
+                return;
+            }
+            Modal modifyModal = Modal.create("modify_modal", "Modify Note Details")
+                    .addComponents(
+                            Label.of("Change Attachments", AttachmentUpload.create("uploaded_note").setRequiredRange(1,10).build()),
+                            Label.of("Replace existing?", createToggle("attachment_toggle", "Replace existing attachments")),
+                            Label.of("Change Title", TextInput.create("title", TextInputStyle.SHORT).build()),
+                            Label.of("Change Course Code", TextInput.create("course_code", TextInputStyle.SHORT).build()),
+                            Label.of("Change Summary", TextInput.create("summary", TextInputStyle.SHORT).build()),
+                            Label.of("Change Tags", courseToTagLinker.getTagsAsSSM(course).build()),
+                            Label.of("Replace existing?", createToggle("tags_toggle", "Replace existing tags"))
+                    )
+                    .build();
+            event.replyModal(modifyModal).queue();
         }
-
-        if (event.getName().equals("change_note_summary")) {
-            event.deferReply().queue(hook -> {
-                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
-                long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
-                String newSummary = Objects.requireNonNull(event.getOption("provided_summary")).getAsString();
-                CompletableFuture.runAsync(() -> {
-                    if (dsh.changeSummary(noteID, newSummary)) {
-                        hook.sendMessage("Successfully changed the summary of note: " + noteID + " to: " + newSummary).queue();
-                    } else {
-                        hook.sendMessage("Could not change the summary of the note!").queue();
-                    }
-                });
-            });
-        }
-
-        if (event.getName().equals("change_note_file")) {
-            event.deferReply().queue(hook -> {
-                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
-                long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
-                Message.Attachment attachment = Objects.requireNonNull(event.getOption("provided_attachment")).getAsAttachment();
-                byte[] data = AttachmentConvertor.convertToBytes(attachment);
-                if(dsh.changeFile(noteID, data, attachment.getFileName())) {
-                    hook.sendMessage("Successfully changed the file of note: " + noteID + " to: " + attachment.getFileName()).queue();
-                } else {
-                    hook.sendMessage("Could not change the file of the note!").queue();
-
-                }
-            });
-        }
+//        if (event.getName().equals("change_note_title")) {
+//            event.deferReply().queue(hook -> {
+//                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
+//                long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
+//                String newTitle = Objects.requireNonNull(event.getOption("provided_title")).getAsString();
+//                CompletableFuture.runAsync(() -> {
+//                    if (dsh.changeTitle(noteID, newTitle)) {
+//                        hook.sendMessage("Successfully changed the title of note: " + noteID + " to: " + newTitle).queue();
+//                    } else {
+//                        hook.sendMessage("Could not change the title of the note!").queue();
+//                    }
+//                });
+//            });
+//        }
+//
+//        if (event.getName().equals("change_note_summary")) {
+//            event.deferReply().queue(hook -> {
+//                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
+//                long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
+//                String newSummary = Objects.requireNonNull(event.getOption("provided_summary")).getAsString();
+//                CompletableFuture.runAsync(() -> {
+//                    if (dsh.changeSummary(noteID, newSummary)) {
+//                        hook.sendMessage("Successfully changed the summary of note: " + noteID + " to: " + newSummary).queue();
+//                    } else {
+//                        hook.sendMessage("Could not change the summary of the note!").queue();
+//                    }
+//                });
+//            });
+//        }
+//
+//        if (event.getName().equals("change_note_file")) {
+//            event.deferReply().queue(hook -> {
+//                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
+//                long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
+//                Message.Attachment attachment = Objects.requireNonNull(event.getOption("provided_attachment")).getAsAttachment();
+//                byte[] data = AttachmentConvertor.convertToBytes(attachment);
+//                if(dsh.changeFile(noteID, data, attachment.getFileName())) {
+//                    hook.sendMessage("Successfully changed the file of note: " + noteID + " to: " + attachment.getFileName()).queue();
+//                } else {
+//                    hook.sendMessage("Could not change the file of the note!").queue();
+//
+//                }
+//            });
+//        }
 
         if (event.getName().equals("generate_summary_by_id")) {
             event.deferReply().queue(hook -> {

@@ -73,17 +73,8 @@ public class OnReadyListener extends ListenerAdapter {
                             .addOption(OptionType.STRING, "provided_course", "Required course code.", true)
                             .addOption(OptionType.STRING, "provided_tag", "Optionally provided tag"),
 
-                    Commands.slash("change_note_title", "Change the title of a note.")
-                            .addOption(OptionType.INTEGER, "provided_id", "Provided ID.", true)
-                            .addOption(OptionType.STRING, "provided_title", "New title.", true),
-
-                    Commands.slash("change_note_summary", "Change the summary of a note.")
-                            .addOption(OptionType.INTEGER, "provided_id", "Provided ID.", true)
-                            .addOption(OptionType.STRING, "provided_summary", "New summary.", true),
-
-                    Commands.slash("change_note_file", "Change the file of a note.")
-                            .addOption(OptionType.INTEGER, "provided_id", "Provided ID.", true)
-                            .addOption(OptionType.ATTACHMENT, "provided_attachment", "New file.", true),
+                    Commands.slash("modify_note", "Modify a note.")
+                            .addOption(OptionType.INTEGER, "provided_id", "Provided ID", true),
 
                     // AI related commands
                     Commands.slash("generate_summary_by_id", "Request a summary of a note based on its database ID.")
