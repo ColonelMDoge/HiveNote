@@ -48,12 +48,6 @@ public class SlashCommandListener extends ListenerAdapter {
         this.jda = jda;
     }
 
-    private StringSelectMenu createToggle(String ID, String prompt) {
-        return StringSelectMenu.create(ID).addOption(prompt, "YES")
-                .setRequiredRange(0,1)
-                .build();
-    }
-
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (!event.isFromGuild()) return;
@@ -234,12 +228,10 @@ public class SlashCommandListener extends ListenerAdapter {
             Modal modifyModal = Modal.create("modify_modal", "Modify Note Details")
                     .addComponents(
                             Label.of("Change Attachments", AttachmentUpload.create("uploaded_note").setRequiredRange(1,10).build()),
-                            Label.of("Replace existing?", createToggle("attachment_toggle", "Replace existing attachments")),
                             Label.of("Change Title", TextInput.create("title", TextInputStyle.SHORT).build()),
                             Label.of("Change Course Code", TextInput.create("course_code", TextInputStyle.SHORT).build()),
                             Label.of("Change Summary", TextInput.create("summary", TextInputStyle.SHORT).build()),
-                            Label.of("Change Tags", courseToTagLinker.getTagsAsSSM(course).build()),
-                            Label.of("Replace existing?", createToggle("tags_toggle", "Replace existing tags"))
+                            Label.of("Change Tags", courseToTagLinker.getTagsAsSSM(course).build())
                     )
                     .build();
             event.replyModal(modifyModal).queue();
