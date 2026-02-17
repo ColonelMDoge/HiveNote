@@ -23,7 +23,7 @@ public class OnReadyListener extends ListenerAdapter {
         logger.info("The Discord bot is ready.");
         JDA jda = event.getJDA();
         slashCommandListener.setJDA(jda);
-        Guild testGuild = jda.getGuildById("1127969348049457295");
+        Guild testGuild = jda.getGuildById(System.getenv("GUILD_ID"));
         if (testGuild != null) {
             testGuild.updateCommands().addCommands(
 
