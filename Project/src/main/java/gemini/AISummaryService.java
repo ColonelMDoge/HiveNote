@@ -41,7 +41,6 @@ public class AISummaryService {
                 content.parts(Part.fromBytes(b, URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(b))));
             }
             response = client.models.generateContent(MODEL_NAME, content.build(), config);
-            System.out.println(prompt);
             return response.text();
         } catch (IOException e) {
             logger.log(Level.WARNING, "Failed to generate a summary!", e);
