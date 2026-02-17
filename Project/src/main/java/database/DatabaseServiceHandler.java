@@ -11,6 +11,8 @@ import java.util.logging.Logger;
 
 import logging.LoggerUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import oracle.ucp.jdbc.PoolDataSourceFactory;
 import oracle.ucp.jdbc.PoolDataSource;
 
@@ -31,6 +33,7 @@ public class DatabaseServiceHandler {
                 poolDataSource.setUser(DB_USER);
                 poolDataSource.setPassword(DB_PASSWORD);
                 poolDataSource.setConnectionPoolName("JDBC_UCP_POOL");
+                poolDataSource.setLoginTimeout(5);
                 logger.info("PoolDataSource created.");
                 return poolDataSource;
             } catch (SQLException e) {
@@ -40,12 +43,12 @@ public class DatabaseServiceHandler {
         return poolDataSource;
     }
 
-    public boolean testConnection() {
-        try (Connection conn = getPoolDataSource().getConnection()) {
-            return conn.isValid(5);
+    public void testConnection() {
+        try (Connection ignored = getPoolDataSource().getConnection()) {
+            logger.info("Connected to the HiveNote database.");
         } catch (SQLException ex) {
             logger.severe("Could not connect to database: " + ex.getMessage());
-            return false;
+            throw new RuntimeException("Could not connect to the HiveNote database.");
         }
     }
 
@@ -69,6 +72,7 @@ public class DatabaseServiceHandler {
             }
         } catch (SQLException e) {
             logger.log(Level.WARNING, "There was an exception preloading data: ", e);
+            return null;
         }
         logger.info("Preloading data complete.");
         return data;
@@ -201,7 +205,7 @@ public class DatabaseServiceHandler {
         }
     }
 
-    public void uploadToDB(Note note) {
+    public long uploadToDB(Note note) {
         long note_id = -1;
         String courseStatement = """
                SELECT COURSE_ID FROM COURSE WHERE COURSE_CODE = ?
@@ -241,7 +245,7 @@ public class DatabaseServiceHandler {
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "There was an exception inserting a note!", e);
-            return;
+            return -1;
         }
         String attachmentStatement = """
                 INSERT INTO ATTACHMENT (NOTE_ID, FILE_NAME, FILE_BLOB)
@@ -258,23 +262,26 @@ public class DatabaseServiceHandler {
             ps.executeBatch();
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "There was an exception inserting an attachment!", e);
+            return -1;
         }
         logger.info("Note successfully uploaded to the database.");
+        return note_id;
     }
 
-    public byte[] retrieveBlob(long noteID) {
+    public List<byte[]> retrieveBlob(long noteID) {
         String statement = """
                 SELECT FILE_BLOB FROM ATTACHMENT WHERE NOTE_ID = ?
                 """;
+        List<byte[]> blobs = new ArrayList<>();
         try (Connection conn = getPoolDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(statement)) {
             ps.setLong(1, noteID);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                byte[] blob = rs.getBytes(1);
-                rs.close();
-                return blob;
+            while (rs.next()) {
+                blobs.add(rs.getBytes(1));
             }
+            rs.close();
+            return blobs;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "There was an exception retrieving a blob!", e);
         }
@@ -336,7 +343,7 @@ public class DatabaseServiceHandler {
 
     public Note retrieveByNoteID(long noteID) {
         String statement = """
-                SELECT n.USER_ID, n.NOTE_TITLE, n.CREATED_AT, n.UPDATED_AT, n.NOTE_SUMMARY, c.course_name
+                SELECT n.USER_ID, n.NOTE_TITLE, n.CREATED_AT, n.UPDATED_AT, n.NOTE_SUMMARY, c.COURSE_CODE, c.COURSE_NAME
                 FROM NOTE n
                 JOIN COURSE c
                     ON n.course_id = c.course_id
@@ -382,6 +389,7 @@ public class DatabaseServiceHandler {
                         rs.getTimestamp(4).toInstant().atOffset(ZoneOffset.UTC),
                         rs.getString(5),
                         rs.getString(6),
+                        rs.getString(7),
                         blobs,
                         tags
                 );
@@ -396,69 +404,108 @@ public class DatabaseServiceHandler {
         return null;
     }
 
-    public boolean changeTitle(long noteID, String newTitle) {
-        String statement = """
-                UPDATE NOTE SET NOTE_TITLE = ?, UPDATED_AT = ? WHERE NOTE_ID = ?
-                """;
+    public void updateNote(long noteID, ModalMapping newCourseCode, ModalMapping newAttachments, ModalMapping newTitle, ModalMapping newSummary, ModalMapping newTags) {
+        String updateNoteSQL = """
+        UPDATE NOTE n
+        SET NOTE_TITLE   = COALESCE(?, n.NOTE_TITLE),
+            NOTE_SUMMARY = COALESCE(?, n.NOTE_SUMMARY),
+            UPDATED_AT   = ?,
+            COURSE_ID    = COALESCE(
+                               (SELECT c.COURSE_ID
+                                FROM COURSE c
+                                WHERE c.COURSE_CODE = ?),
+                               n.COURSE_ID
+                           )
+        WHERE n.NOTE_ID = ?
+        """;
+
+        String deleteAttachmentsSQL = "DELETE FROM ATTACHMENT WHERE NOTE_ID = ?";
+        String insertAttachmentsSQL = """
+        INSERT INTO ATTACHMENT (NOTE_ID, FILE_BLOB, FILE_NAME)
+        VALUES (?, ?, ?)
+        """;
+
+        String deleteTagsSQL = "DELETE FROM NOTE_TAG_JUNCTION WHERE NOTE_ID = ?";
+
+        String insertTagSQL = """
+        INSERT INTO NOTE_TAG_JUNCTION (NOTE_ID, TAG_ID)
+        SELECT ?, t.TAG_ID
+        FROM TAG t
+        WHERE t.TAG_NAME = ?
+        """;
+
+        try (Connection conn = getPoolDataSource().getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(updateNoteSQL)) {
+                try {
+                    if (newTitle == null) ps.setNull(1, Types.VARCHAR);
+                    else ps.setString(1, newTitle.getAsString());
+
+                    if (newSummary == null) ps.setNull(2, Types.VARCHAR);
+                    else ps.setString(2, newSummary.getAsString());
+
+                    ps.setTimestamp(3, Timestamp.from(Instant.now()));
+
+                    if (newCourseCode.getAsStringList().isEmpty()) ps.setNull(4, Types.VARCHAR);
+                    else ps.setString(4, newCourseCode.getAsStringList().get(0));
+
+                    ps.setLong(5, noteID);
+                } catch (Exception e){
+                    System.out.println(e.getMessage());
+                }
+                ps.executeUpdate();
+                logger.info("Descriptors successfully updated!");
+            }
+            if (!newAttachments.getAsAttachmentList().isEmpty()) {
+                try (PreparedStatement ps = conn.prepareStatement(deleteAttachmentsSQL)) {
+                    ps.setLong(1, noteID);
+                    ps.executeUpdate();
+                }
+
+                try (PreparedStatement ps = conn.prepareStatement(insertAttachmentsSQL)) {
+                    for (Message.Attachment a : newAttachments.getAsAttachmentList()) {
+                        ps.setLong(1, noteID);
+                        ps.setBytes(2, AttachmentConvertor.convertToBytes(a));
+                        ps.setString(3, a.getFileName());
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+                logger.info("Attachments successfully updated!");
+            }
+
+            if (!newTags.getAsStringList().isEmpty()) {
+                try (PreparedStatement ps = conn.prepareStatement(deleteTagsSQL)) {
+                    ps.setLong(1, noteID);
+                    ps.executeUpdate();
+                }
+
+                try (PreparedStatement ps = conn.prepareStatement(insertTagSQL)) {
+                    for (String tag : newTags.getAsStringList()) {
+                        ps.setLong(1, noteID);
+                        ps.setString(2, tag);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+                logger.info("Tags successfully updated!");
+
+            }
+            logger.info("Note updated successfully.");
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "Failed to update note!", e);
+        }
+    }
+    public boolean deleteNote(long noteID) {
+        String statement = "DELETE FROM NOTE WHERE NOTE_ID = ?";
         try (Connection conn = getPoolDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(statement)) {
-            ps.setString(1, newTitle);
-            ps.setTimestamp(2, Timestamp.from(Instant.now()));
-            ps.setLong(3, noteID);
+            ps.setLong(1, noteID);
             ps.executeUpdate();
-            logger.info("Title successfully updated.");
+            logger.info("Note successfully deleted.");
             return true;
         } catch (SQLException e) {
-            logger.log(Level.WARNING, "There was a problem updating the title of a note!", e);
+            logger.log(Level.WARNING, "Failed to delete note!", e);
         }
         return false;
-    }
-
-    public boolean changeSummary(long noteID, String newSummary) {
-        String statement = """
-                UPDATE NOTE SET NOTE_SUMMARY = ?, UPDATED_AT = ? WHERE NOTE_ID = ?
-                """;
-        try (Connection conn = getPoolDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(statement)) {
-            ps.setString(1, newSummary);
-            ps.setTimestamp(2, Timestamp.from(Instant.now()));
-            ps.setLong(3, noteID);
-            ps.executeUpdate();
-            logger.info("Summary successfully updated.");
-            return true;
-        } catch (SQLException e) {
-            logger.log(Level.WARNING, "There was a problem updating the summary of a note!", e);
-        }
-        return false;
-    }
-
-    public boolean changeFile(long noteID, byte[] newFile, String newFileName) {
-        String statement = """
-                UPDATE ATTACHMENT SET FILE_BLOB = ?, FILE_NAME = ? WHERE NOTE_ID = ?
-                """;
-        String noteUpdate = """
-                UPDATE NOTE SET UPDATED_AT = ? WHERE NOTE_ID = ?
-                """;
-        try (Connection conn = getPoolDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(statement)) {
-            ps.setBytes(1, newFile);
-            ps.setString(2, newFileName);
-            ps.setLong(3, noteID);
-            ps.executeUpdate();
-            logger.info("Attachment successfully updated.");
-        } catch (SQLException e) {
-            logger.log(Level.WARNING, "There was a problem updating the file of a note!", e);
-            return false;
-        }
-        try (Connection conn = getPoolDataSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement(noteUpdate)) {
-            ps.setTimestamp(1, Timestamp.from(Instant.now()));
-            ps.setLong(2, noteID);
-            logger.info("Note successfully updated.");
-        } catch (SQLException e) {
-            logger.log(Level.WARNING, "There was a problem updating the file of a note!", e);
-            return false;
-        }
-        return true;
     }
 }

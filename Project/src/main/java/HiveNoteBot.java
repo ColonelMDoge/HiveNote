@@ -1,3 +1,4 @@
+import database.DatabaseServiceHandler;
 import discord.CourseToTagLinker;
 import discord.ModalListener;
 import discord.OnReadyListener;
@@ -22,6 +23,10 @@ public class HiveNoteBot {
         System.setProperty("java.util.logging.manager", LoggerUtil.MyLogManager.class.getName());
         JDABuilder jdaBuilder = JDABuilder.createDefault(TOKEN);
         JDALogger.setFallbackLoggerEnabled(false);
+
+        DatabaseServiceHandler dsh = new DatabaseServiceHandler();
+        dsh.testConnection();
+
         jdaBuilder.setChunkingFilter(ChunkingFilter.ALL)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableCache(CacheFlag.ONLINE_STATUS)

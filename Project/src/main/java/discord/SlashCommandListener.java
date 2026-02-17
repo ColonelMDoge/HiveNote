@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.components.attachmentupload.AttachmentUpload;
 import net.dv8tion.jda.api.components.label.Label;
-import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Message;
@@ -184,7 +183,7 @@ public class SlashCommandListener extends ListenerAdapter {
             long id = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
             Note note = dsh.retrieveByNoteID(id);
             if (note == null) {
-                event.getHook().sendMessage("There is no note associated with id of: " + id).queue();
+                event.getHook().sendMessage("There is no note associated with id of: " + id + ".").queue();
                 return;
             }
             NoteEmbed embed = new NoteEmbed(note, jda);
@@ -225,61 +224,30 @@ public class SlashCommandListener extends ListenerAdapter {
                 event.reply("No note exists with provided ID.").queue();
                 return;
             }
-            Modal modifyModal = Modal.create("modify_modal", "Modify Note Details")
+            Modal modifyModal = Modal.create("modify_modal:" + course + ":" + noteID, "Modify Note Details")
                     .addComponents(
-                            Label.of("Change Attachments", AttachmentUpload.create("uploaded_note").setRequiredRange(1,10).build()),
-                            Label.of("Change Title", TextInput.create("title", TextInputStyle.SHORT).build()),
-                            Label.of("Change Course Code", TextInput.create("course_code", TextInputStyle.SHORT).build()),
-                            Label.of("Change Summary", TextInput.create("summary", TextInputStyle.SHORT).build()),
-                            Label.of("Change Tags", courseToTagLinker.getTagsAsSSM(course).build())
+                            Label.of("Change Attachments", AttachmentUpload.create("modified_notes").setRequiredRange(1,10).setRequired(false).build()),
+                            Label.of("Change Title", TextInput.create("title", TextInputStyle.SHORT).setRequired(false).build()),
+                            Label.of("Change Course Code", courseToTagLinker.getCoursesAsSSM().setRequired(false).build()),
+                            Label.of("Change Summary", TextInput.create("summary", TextInputStyle.SHORT).setRequired(false).build()),
+                            Label.of("Change Tags", courseToTagLinker.getTagsAsSSM(course).setRequired(false).build())
                     )
                     .build();
             event.replyModal(modifyModal).queue();
         }
-//        if (event.getName().equals("change_note_title")) {
-//            event.deferReply().queue(hook -> {
-//                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
-//                long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
-//                String newTitle = Objects.requireNonNull(event.getOption("provided_title")).getAsString();
-//                CompletableFuture.runAsync(() -> {
-//                    if (dsh.changeTitle(noteID, newTitle)) {
-//                        hook.sendMessage("Successfully changed the title of note: " + noteID + " to: " + newTitle).queue();
-//                    } else {
-//                        hook.sendMessage("Could not change the title of the note!").queue();
-//                    }
-//                });
-//            });
-//        }
-//
-//        if (event.getName().equals("change_note_summary")) {
-//            event.deferReply().queue(hook -> {
-//                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
-//                long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
-//                String newSummary = Objects.requireNonNull(event.getOption("provided_summary")).getAsString();
-//                CompletableFuture.runAsync(() -> {
-//                    if (dsh.changeSummary(noteID, newSummary)) {
-//                        hook.sendMessage("Successfully changed the summary of note: " + noteID + " to: " + newSummary).queue();
-//                    } else {
-//                        hook.sendMessage("Could not change the summary of the note!").queue();
-//                    }
-//                });
-//            });
-//        }
-//
-//        if (event.getName().equals("change_note_file")) {
-//            event.deferReply().queue(hook -> {
-//                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
-//                long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
-//                Message.Attachment attachment = Objects.requireNonNull(event.getOption("provided_attachment")).getAsAttachment();
-//                byte[] data = AttachmentConvertor.convertToBytes(attachment);
-//                if(dsh.changeFile(noteID, data, attachment.getFileName())) {
-//                    hook.sendMessage("Successfully changed the file of note: " + noteID + " to: " + attachment.getFileName()).queue();
-//                } else {
-//                    hook.sendMessage("Could not change the file of the note!").queue();
-//
-//                }
-//            });
-//        }
+
+        if (event.getName().equals("delete_note")) {
+            long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
+            if (dsh.retrieveByNoteID(noteID) == null) {
+                event.reply("There is no note with the associated ID of: " + noteID).queue();
+                return;
+            }
+            if (dsh.deleteNote(noteID)) {
+                event.reply("Note successfully deleted.").queue();
+            } else {
+                event.reply("Note could not be deleted!").queue();
+            }
+        }
 
         if (event.getName().equals("generate_summary_by_id")) {
             event.deferReply().queue(hook -> {
@@ -288,8 +256,8 @@ public class SlashCommandListener extends ListenerAdapter {
                     try {
                         long id = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
                         String prompt = Objects.requireNonNull(event.getOption("provided_prompt")).getAsString();
-                        byte[] data = dsh.retrieveBlob(id);
-                        if (data == null) {
+                        List<byte[]> data = dsh.retrieveBlob(id);
+                        if (data.isEmpty()) {
                             hook.sendMessage("There is no data associated with id of: " + id).queue();
                             return;
                         }

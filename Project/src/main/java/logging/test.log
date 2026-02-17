@@ -1,6 +1,5 @@
-2026-02-05 23:19:59 [INFO] logging.LoggerUtil.setupLogging: Logging started. 
-2026-02-05 23:20:00 [INFO] database.DatabaseServiceHandler.getPoolDataSource: PoolDataSource created. 
-2026-02-05 23:20:01 [INFO] database.DatabaseServiceHandler.preLoadData: Preloading data complete. 
-2026-02-05 23:20:03 [INFO] discord.OnReadyListener.onReady: Connected to the HiveNote database. 
-2026-02-05 23:20:03 [INFO] discord.OnReadyListener.onReady: The Discord bot is ready. 
-2026-02-05 23:20:04 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "modify_note" slash command interaction was received from: colonelmdoge. 
+2026-02-17 17:29:42 [INFO] logging.LoggerUtil.setupLogging: Logging started. 
+2026-02-17 17:29:42 [INFO] database.DatabaseServiceHandler.getPoolDataSource: PoolDataSource created. 
+2026-02-17 17:29:45 [INFO] database.DatabaseServiceHandler.preLoadData: Preloading data complete. 
+2026-02-17 17:29:45 [INFO] database.DatabaseServiceHandler.testConnection: Connected to the HiveNote database. 
+2026-02-17 17:29:47 [INFO] discord.OnReadyListener.onReady: The Discord bot is ready. 

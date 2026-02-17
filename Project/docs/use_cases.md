@@ -12,13 +12,13 @@ This document describes the main use cases for the HiveNote, including user acti
 - User must be a member of the database.
 
 **Trigger:**  
-`/upload_note <databaseID> <file/title>`
+`/upload_note <provided_course_code>`
 
 **Main Success Scenario:**
 1. User uploads a note or file.
 2. The System stores the note and metadata.
 3. System extracts text content.
-4. System stores tags (manual or auto).
+4. System stores tags.
 5. System confirms the upload.
 
 **Postconditions:**
@@ -26,7 +26,31 @@ This document describes the main use cases for the HiveNote, including user acti
 
 ---
 
-### Use Case 2 — Retrieve Notes by Tag
+### Use Case 2 — Updating a Note
+
+**Primary Actor:** User  
+**Goal:** Updates a note.
+
+**Preconditions:**
+- Note exists in the database.
+
+**Trigger:**  
+`/modify_note <noteID>`
+
+**Main Success Scenario:**
+1. User requests note modification
+2. System searches within the database.
+3. The System returns matching note to modify.
+4. User modifies note and submits.
+5. Database reflects changes.
+6. Bot confirms the change.
+
+**Postconditions:**
+- Discord bot sends a message.
+
+---
+
+### Use Case 3 — Retrieve Notes by Course Code or Tag
 
 **Primary Actor:** User  
 **Goal:** Search for notes using tags.
@@ -35,10 +59,10 @@ This document describes the main use cases for the HiveNote, including user acti
 - Tagged notes exist in the database.
 
 **Trigger:**  
-`/search_tag <tag>`
+`/retrieve_ids_by_filter <course_code> <tag>`
 
 **Main Success Scenario:**
-1. User requests notes by tag.
+1. User requests notes by course code or tag.
 2. System searches within the database.
 3. The System returns matching notes.
 
@@ -47,7 +71,7 @@ This document describes the main use cases for the HiveNote, including user acti
 
 ---
 
-### Use Case 3 — Generate AI Summary for a Note
+### Use Case 4 — Generate AI Summary for a Note
 
 **Primary Actor:** User  
 **Goal:** Produce a short AI-generated summary.
@@ -56,7 +80,7 @@ This document describes the main use cases for the HiveNote, including user acti
 - Note must exist.
 
 **Trigger:**  
-`/summarize <noteID>`
+`/generate_summary_by_id <noteID>`
 
 **Main Success Scenario:**
 1. User requests a summary.
@@ -71,13 +95,13 @@ This document describes the main use cases for the HiveNote, including user acti
 
 ---
 
-### Use Case 4 — Generate Study Questions
+### Use Case 5 — Generate Study Questions
 
 **Primary Actor:** User  
 **Goal:** Receive AI-generated study questions.
 
 **Trigger:**  
-`/questions <noteID>`
+`/generate_questions_by_id <noteID>`
 
 **Main Success Scenario:**
 1. User requests question generation.
@@ -86,19 +110,16 @@ This document describes the main use cases for the HiveNote, including user acti
 4. System stores generated questions.
 5. The System sends questions to the user.
 
-**Postconditions:**
-- Questions saved in a database.
-
 ---
 
-### Use Case 5 — Add or Modify Tags
+### Use Case 6 — Add or Remove Tags
 
 **Primary Actor:** User  
 **Goal:** Add or remove tags from a note.
 
 **Triggers:**  
-- `/add_tag <noteID> <tag>`  
-- `/remove_tag <noteID> <tag>`
+- `/create_tag <course_code> <tag>`  
+- `/delete_tag <course_code> <tag>`
 
 **Main Success Scenario:**
 1. User requests tag modification.

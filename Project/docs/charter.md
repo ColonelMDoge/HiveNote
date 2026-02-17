@@ -8,14 +8,14 @@
 ### 2. Project Purpose
 The purpose of this project is to store both analog and digital notes, organizing them based on categories and tags.
 Multiple people will be able to upload and retrieve their notes to and from a single database.
-A HiveMind AI tool will be used to help summarize, provide insight, and generate practice problems from the provided notes plus internet searches.
-All outputs of the AI will be formatted into LaTeX and sent through the Discord Bot.
+Google Gemini will be used to help summarize, provide insight, and generate practice problems from the provided notes.
+All outputs of the AI will be formatted into LaTeX when applicable and sent through the Discord Bot.
 
 ---
 
 ### 3. Project Objectives
-- Implement **upload**, **delete**, and **HiveMind AI** functionality.
-- Implement the core features: `uploadNotes()`, `deleteMyNotes()`, `retrieveNotes()`, `generateSummary()`, etc. 
+- Implement **upload**, **delete**, and **Google Gemini** functionality.
+- Implement the core features: `uploadNotes()`, `deleteNotes()`, `retrieveNotes()`, `generateSummary()`, etc. 
 - Integrate **logging** with **code coverage** to ensure thorough testing.
 
 ---
@@ -113,6 +113,7 @@ All outputs of the AI will be formatted into LaTeX and sent through the Discord 
 | ColonelMDoge   | 11/20/2025       | Renamed functions and formatted strings correctly     | PNC Logistics | 11/20/2025    |
 | ColonelMDoge   | 11/27/2025       | Updated potential budget changes and SQL language use | PNC Logistics | 11/27/2025    |
 | ColonelMDoge   | 11/30/2025       | Removed some core functions and edited clarity        | PNC Logistics | 11/30/2025    |
+| ColonelMDoge   | 02/13/2025       | Full core implementation of application               | PNC Logistics | 02/13/2026    |
 ---
 
 **File:** `Project/docs/charter.md`

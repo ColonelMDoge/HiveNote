@@ -10,6 +10,7 @@ public record Note(long NOTE_ID,
                    OffsetDateTime UPDATED_AT,
                    String NOTE_SUMMARY,
                    String COURSE_CODE,
+                   String COURSE_NAME,
                    List<Attachment> ATTACHMENTS,
                    List<String> TAGS) {
 }

@@ -1,6 +1,5 @@
 package discord;
 
-import database.DatabaseServiceHandler;
 import logging.LoggerUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -15,19 +14,12 @@ import java.util.logging.Logger;
 public class OnReadyListener extends ListenerAdapter {
     private final Logger logger = LoggerUtil.getLogger(OnReadyListener.class);
     private final SlashCommandListener slashCommandListener;
-    private final DatabaseServiceHandler dsh = new DatabaseServiceHandler();
 
     public OnReadyListener(SlashCommandListener slashCommandListener) {
         this.slashCommandListener = slashCommandListener;
     }
 
     public void onReady(@NotNull ReadyEvent event) {
-        if (dsh.testConnection()) {
-            logger.info("Connected to the HiveNote database.");
-        } else {
-            throw new RuntimeException("Could not connect to the HiveNote database.");
-        }
-
         logger.info("The Discord bot is ready.");
         JDA jda = event.getJDA();
         slashCommandListener.setJDA(jda);
@@ -74,6 +66,9 @@ public class OnReadyListener extends ListenerAdapter {
                             .addOption(OptionType.STRING, "provided_tag", "Optionally provided tag"),
 
                     Commands.slash("modify_note", "Modify a note.")
+                            .addOption(OptionType.INTEGER, "provided_id", "Provided ID", true),
+
+                    Commands.slash("delete_note", "Delete a note.")
                             .addOption(OptionType.INTEGER, "provided_id", "Provided ID", true),
 
                     // AI related commands

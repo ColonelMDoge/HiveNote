@@ -24,7 +24,7 @@ public class NoteEmbed extends EmbedBuilder {
         this.setColor(new Color(235, 171, 0));
         this.setDescription(note.NOTE_SUMMARY());
         this.setThumbnail(Objects.requireNonNull(jda.getUserById(note.USER_ID())).getAvatarUrl());
-        this.addField("Course:", note.COURSE_CODE(), true);
+        this.addField("Course: " + note.COURSE_CODE(), note.COURSE_NAME(), true);
         this.addField("Author:", Objects.requireNonNull(jda.getUserById(note.USER_ID())).getName(), true);
         this.addField("Tags:", (note.TAGS() == null || note.TAGS().isEmpty())
                         ? "No applicable tags."

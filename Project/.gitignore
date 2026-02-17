@@ -36,3 +36,9 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Ignore log files
+*.log
+
+# Ignore log lock files
+*.lck

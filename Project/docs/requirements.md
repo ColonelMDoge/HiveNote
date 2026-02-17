@@ -1,186 +1,180 @@
-# Requirements – HiveMind Discord Bot
+# HiveMind Discord Bot Requirements
+
+---
 
 ## 1. Overview
-The HiveMind Discord Bot allows users to upload their notes to a centralized database that automatically organizes them using tags.  
-Users can then retrieve notes based on tags or filters, and use AI to generate summaries, study questions, and insights.
+The **HiveMind Discord Bot** allows users to upload their notes to a centralized database that automatically organizes them using tags. Users can retrieve notes based on tags or filters, and use AI to generate summaries, study questions, and insights.
 
 ---
 
-## 2. Functional Requirements
+## 2. Commands and Functional Requirements
 
-### 2.1 uploadNotes()
-**Description:**  
-Allows a user to upload notes and tag them for organization and retrieval.
-
-**Inputs:**  
-- `userid` (string)  
-- `databaseID` (string)  
-- `noteContent` (string or file)  
-- `tags` (string list)
-
-**Process:**  
-- Validate user membership  
-- Store note content in a database  
-- Associate tags with note  
-- Timestamp the entry
-- Add author's userid
-
-**Outputs:**  
-- `noteID`  
-- Confirmation message
+### **/ask**
+**Description:** Prompt the bot with a question.  
+**Options:**
+- `asked_prompt` (STRING, required): The prompt you want to ask.  
+  **Outputs:**
+- AI-generated response based on the prompt.
 
 ---
 
-### 2.2 retrieveNotes()
-**Description:**  
-Fetches notes that match user-defined filters such as tags or keywords.
-
-**Inputs:**  
-- `databaseID` (string)  
-- `filters` (tags, date, keywords, userID, etc.)
-
-**Process:**  
-- Validate access  
-- Query notes table based on filters  
-- Return matching notes in sorted order (relevance or time)
-
-**Outputs:**  
-- List of matching notes with metadata
-
----
-
-### 2.3 generateSummary()
-**Description:**  
-Uses AI to generate a concise summary based on selected notes.
-
-**Inputs:**  
-- `noteID` or list of note IDs  
-- `summaryLength` (optional)
-
-**Process:**  
-- Retrieve note content  
-- Send to AI summarization module  
-- Optionally store generated summary
-
-**Outputs:**  
-- Summary text
-
----
-
-### 2.4 generateQuestions()
-**Description:**  
-Creates study questions from provided notes using an AI model.
-
-**Inputs:**  
-- `noteID` or list of note IDs  
-- `questionType` (optional)
-
-**Process:**  
-- Retrieve content  
-- Run question-generation function  
-- Format for Discord output using LaTeX
-
-**Outputs:**  
-- List of questions
-
----
-
-### 2.5 generateInsights()
-**Description:**  
-Produces conceptual insights or themes extracted from notes.
-
-**Inputs:**  
-- `noteID` or list of note IDs
-
-**Process:**  
-- Retrieve notes  
-- Analyze with AI for themes or patterns  
-- Compile insights
-
-**Outputs:**  
-- Insight report
-
----
-
-### 2.6 createTag()
-**Description:**  
-Allows admins or users to add new tags to the database.
-
-**Inputs:**  
-- `databaseID` (string)  
-- `tagName` (string)
-
-**Process:**  
-- Validate database  
-- Check for duplicates  
-- Insert new tag
-
-**Outputs:**  
-- Confirmation message  
-- Updated tag list
-
----
-
-### 2.7 deleteMyNotes()
-**Description:**
-Deletes notes that are owned by the calling user
-
-**Inputs:**
-- `userID`
-- list<string> `noteIDs`
-- `databaseID`
-
-**Process:**
-- Verify that the user owns respective notes
-- Delete the provided notes
-
+### **/help**
+**Description:** Get a list of all available commands.  
+**Options:** None  
 **Outputs:**
-- Confirmation message
+- List of commands and their brief descriptions.
+
+---
+
+### **/retrieve_course_codes**
+**Description:** Retrieve a list of all course codes in the database.  
+**Options:** None  
+**Outputs:**
+- List of course codes.
+
+---
+
+### **/retrieve_tags_by_course**
+**Description:** Retrieve a list of all tags associated with a specific course.  
+**Options:**
+- `provided_course` (STRING, required): The course code to query tags for.  
+  **Outputs:**
+- List of tags related to the provided course.
+
+---
+
+### **/create_tag**
+**Description:** Create a new tag for a course.  
+**Options:**
+- `provided_course` (STRING, required): Course code the tag belongs to.
+- `created_tag` (STRING, required): Name of the tag to create.  
+  **Outputs:**
+- Confirmation message.
+- Updated tag list.
+
+---
+
+### **/delete_tag**
+**Description:** Delete a tag from a course.  
+**Options:**
+- `provided_course` (STRING, required): Course code the tag belongs to.
+- `deleted_tag` (STRING, required): Name of the tag to delete.  
+  **Outputs:**
+- Confirmation message.
+- Updated tag list.
+
+---
+
+### **/create_course**
+**Description:** Create a new course code in the database.  
+**Options:**
+- `created_course` (STRING, required): Course code to create.
+- `provided_name` (STRING, required): Name of the course.  
+  **Outputs:**
+- Confirmation message.
+- Updated course list.
+
+---
+
+### **/delete_course**
+**Description:** Delete a course code from the database.  
+**Options:**
+- `deleted_course` (STRING, required): Course code to delete.  
+  **Outputs:**
+- Confirmation message.
+- Updated course list.
+
+---
+
+### **/upload_note**
+**Description:** Upload a note to the database.  
+**Options:**
+- `asked_course` (STRING, required): Course code associated with the note.  
+  **Outputs:**
+- `noteID` of the uploaded note.
+- Confirmation message.
+
+---
+
+### **/retrieve_note_by_id**
+**Description:** Retrieve a note based on its database ID.  
+**Options:**
+- `provided_id` (INTEGER, required): The ID of the note to retrieve.  
+  **Outputs:**
+- Note content and metadata.
+
+---
+
+### **/retrieve_ids_by_filter**
+**Description:** Retrieve a list of note IDs based on course and optional tag filters.  
+**Options:**
+- `provided_course` (STRING, required): Course code to filter notes.
+- `provided_tag` (STRING, optional): Tag to filter notes.  
+  **Outputs:**
+- List of note IDs matching the filter.
+
+---
+
+### **/modify_note**
+**Description:** Modify a note based on its database ID.  
+**Options:**
+- `provided_id` (INTEGER, required): ID of the note to modify.  
+  **Outputs:**
+- Confirmation message.
+
+---
+
+### **/generate_summary_by_id**
+**Description:** Generate an AI summary of a note based on its database ID.  
+**Options:**
+- `provided_id` (INTEGER, required): ID of the note to summarize.
+- `provided_prompt` (STRING, optional): Optional custom prompt (default is standard summary).  
+  **Outputs:**
+- Generated summary text.
 
 ---
 
 ## 3. Non-Functional Requirements
 
-### 3.1 Performance
-- Bot must respond to user commands within **2 seconds** for standard operations.  
+### **3.1 Performance**
+- Bot must respond to user commands within **5 seconds** for standard operations.
 - AI processing (summaries, insights) should return results within **10 seconds**.
 
-### 3.2 Reliability
-- Data must be saved with 99% reliability; no unintentional data loss.  
-- Database IDs must be globally unique.
+### **3.2 Reliability**
+- Data must be saved with **99% reliability**; no unintentional data loss.
+- Database IDs must be **globally unique**.
 
-### 3.3 Scalability
-- The System should support **hundreds** of notes and **tens** of users per database.
+### **3.3 Scalability**
+- The system should support **hundreds of notes** and **tens of users** per database.
 
-### 3.4 Security
-- Only verified users may access a database.  
-- Only admins may delete databases.
+### **3.4 Security**
+- Only verified users may access a database.
+- Only admins may delete databases through Oracle Cloud.
 
-### 3.5 Maintainability
-- Code must follow modular structure: DB operations, AI operations, and Discord command handlers.
+### **3.5 Maintainability**
+- Code must follow a modular structure: **DB operations**, **AI operations**, and **Discord command handlers**.
 
 ---
 
 ## 4. System Requirements
 
-### 4.1 Software
+### **4.1 Software**
 - Java 17+
-- Maven for dependency management.
-- SQL Language for a database.
-- JaCoCo for logging.
-- Ojdbc for OCI DB connection.
-- Java Discord API.
-- Google Gemini API.
-- jLaTeXMath for LaTeX rendering.
+- Maven for dependency management
+- SQL database
+- JaCoCo for code coverage
+- Ojdbc for OCI DB connection
+- Java Discord API (JDA)
+- Google Gemini API
+- jLaTeXMath for LaTeX rendering
 
 ---
 
 ## 5. Testing Requirements
 
-### 5.1 Test Cases
-- Unit tests for the required functions.
-- Documented in test_plan.md.
-- Test database isolation per user.
-- Test edge cases for non-existent users.
-
----
+### **5.1 Test Cases**
+- Unit tests for all commands and functional requirements.
+- Documented in `test_plan.md`.
+- Test note modifications.
+- Test edge cases for large files or character limits.
+- Test connectivity and error handling.  

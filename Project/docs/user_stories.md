@@ -2,7 +2,7 @@
 
 ## Overview
 This document contains user stories that describes the functionality of the **HiveNote**.
-The app allows users to upload, view, delete, and join multiple DBs by conveniently using a Discord Bot.
+The application allows users to upload, view, and delete from a DB by conveniently using a Discord Bot.
 
 ---
 
@@ -54,6 +54,13 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 **Acceptance Criteria:**
 - Submitted tags follow a RegEx to generalize a multitude of different topics.
 
+### User Story 2.4 - Updating Information
+**As a** user,
+**I want** to update my notes
+**so that** I can any outdated information can quickly be changed.
+
+**Acceptance Criteria:**
+- Discord Bot and Database immediately updates.
 ---
 
 ## 3. User Experience and AI Usage
@@ -86,7 +93,7 @@ The app allows users to upload, view, delete, and join multiple DBs by convenien
 **so that** they are not lost when I stop using the app.
 
 **Acceptance Criteria:**
-- Discord Bot connects to a MySQL DB.
+- Discord Bot connects to the Oracle SQL DB.
 - All operations are reflected in the database.
 
 ---
