@@ -7,6 +7,7 @@ import java.awt.*;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class NoteEmbed extends EmbedBuilder {
@@ -33,5 +34,19 @@ public class NoteEmbed extends EmbedBuilder {
         this.addField("Created At", formatTime(note.CREATED_AT()), true);
         this.addField("Updated At", formatTime(note.UPDATED_AT()), true);
         this.setFooter("Retrieved from the HiveNote DB with an ID of: " + note.NOTE_ID());
+    }
+
+    public NoteEmbed(HashMap<Long, String> fields) {
+        StringBuilder builder = new StringBuilder();
+        for (Long key : fields.keySet()) {
+            builder.append("ID: ")
+                    .append(key)
+                    .append(". Title: ")
+                    .append(fields.get(key))
+                    .append("\n");
+        }
+        this.setTitle("Fetched Notes by ID");
+        this.setColor(new Color(235, 171, 0));
+        this.addField("Fetched IDs:", builder.toString(), true);
     }
 }

@@ -6,11 +6,9 @@ import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
 import logging.LoggerUtil;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URLConnection;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,14 +30,12 @@ public class AISummaryService {
         }
         return null;
     }
-    public String generateSummary(String prompt, List<byte[]> data) {
+    public String generateSummary(byte[] data) {
         GenerateContentResponse response;
         try (Client client = new Client()) {
             Content.Builder content = Content.builder();
-            content.parts(Part.fromText(prompt));
-            for (byte[] b : data) {
-                content.parts(Part.fromBytes(b, URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(b))));
-            }
+            content.parts(Part.fromText("Summarize this:"));
+            content.parts(Part.fromBytes(data, URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(data))));
             response = client.models.generateContent(MODEL_NAME, content.build(), config);
             return response.text();
         } catch (IOException e) {

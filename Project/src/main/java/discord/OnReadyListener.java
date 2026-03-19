@@ -14,16 +14,19 @@ import java.util.logging.Logger;
 public class OnReadyListener extends ListenerAdapter {
     private final Logger logger = LoggerUtil.getLogger(OnReadyListener.class);
     private final SlashCommandListener slashCommandListener;
+    private final ButtonListener buttonListener;
 
-    public OnReadyListener(SlashCommandListener slashCommandListener) {
+    public OnReadyListener(SlashCommandListener slashCommandListener, ButtonListener buttonListener) {
         this.slashCommandListener = slashCommandListener;
+        this.buttonListener = buttonListener;
     }
 
     public void onReady(@NotNull ReadyEvent event) {
         logger.info("The Discord bot is ready.");
         JDA jda = event.getJDA();
         slashCommandListener.setJDA(jda);
-        Guild testGuild = jda.getGuildById(System.getenv("GUILD_ID"));
+        buttonListener.setJDA(jda);
+        Guild testGuild = jda.getGuildById(System.getenv("TEST_GUILD_ID"));
         if (testGuild != null) {
             testGuild.updateCommands().addCommands(
 
@@ -69,12 +72,7 @@ public class OnReadyListener extends ListenerAdapter {
                             .addOption(OptionType.INTEGER, "provided_id", "Provided ID", true),
 
                     Commands.slash("delete_note", "Delete a note.")
-                            .addOption(OptionType.INTEGER, "provided_id", "Provided ID", true),
-
-                    // AI related commands
-                    Commands.slash("generate_summary_by_id", "Request a summary of a note based on its database ID.")
                             .addOption(OptionType.INTEGER, "provided_id", "Provided ID", true)
-                            .addOption(OptionType.STRING, "provided_prompt", "Optionally provided prompt (Default is a summary request.)")
             ).queue();
         }
     }

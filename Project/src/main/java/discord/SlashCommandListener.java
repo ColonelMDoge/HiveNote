@@ -6,12 +6,13 @@ import latex.LatexConverter;
 import logging.LoggerUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.attachmentupload.AttachmentUpload;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.components.label.Label;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -19,8 +20,6 @@ import net.dv8tion.jda.api.modals.Modal;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.*;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -66,7 +65,7 @@ public class SlashCommandListener extends ListenerAdapter {
             );
             try {
                 String returnedMessage = aiSummaryService.generateResponse(Objects.requireNonNull(event.getOption("asked_prompt")).getAsString());
-                sendMessages(event.getMessageChannel(), latexConverter.extractLatexFromString(returnedMessage));
+                event.getHook().sendFiles(FileUpload.fromData(latexConverter.convertLatexToImage(returnedMessage), "File.png")).queue();
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Failed to generate response.", e);
                 event.reply("An error occurred while generating the response.").queue();
@@ -181,19 +180,26 @@ public class SlashCommandListener extends ListenerAdapter {
         if (event.getName().equals("retrieve_note_by_id")) {
             event.deferReply().queue();
             long id = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
+            int page = 0;
             Note note = dsh.retrieveByNoteID(id);
             if (note == null) {
                 event.getHook().sendMessage("There is no note associated with id of: " + id + ".").queue();
                 return;
             }
             NoteEmbed embed = new NoteEmbed(note, jda);
-            List<FileUpload> uploads = new ArrayList<>();
-            for (Attachment attachment : note.ATTACHMENTS()) {
-                uploads.add(FileUpload.fromData(attachment.data(), attachment.fileName()));
-            }
+            List<Attachment> attachments = note.ATTACHMENTS();
+            Attachment current = attachments.get(page);
+            embed.addField("Attachment (" + (page + 1) + "/" + attachments.size() + ")",
+                    current.fileName(),
+                    false);
+            Button prev = Button.primary("note_prev_" + id + "_" + page, Emoji.fromFormatted("⬅"));
+            Button next = Button.primary("note_next_" + id + "_" + page, Emoji.fromFormatted("➡"));
+            Button gemini = Button.primary("summarize_" + id + "_" + page, "Summarize Using Gemini");
+            Button close = Button.primary("delete", "Close message");
             event.getHook().sendMessageEmbeds(embed.build())
-                    .addFiles(uploads)
-                    .queue(success -> success.delete().queueAfter(1, TimeUnit.MINUTES));
+                    .addFiles(FileUpload.fromData(current.data(), current.fileName()))
+                    .addComponents(ActionRow.of(prev, next, gemini, close))
+                    .queue();
         }
 
         if(event.getName().equals("retrieve_ids_by_filter")) {
@@ -204,9 +210,9 @@ public class SlashCommandListener extends ListenerAdapter {
                     String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString().toUpperCase();
                     OptionMapping om = event.getOption("provided_tag");
                     if (om == null || om.getAsString().isEmpty()) {
-                        ids = dsh.retrieveIDByCourseAndTag(course, null);
+                        ids = new NoteEmbed(dsh.retrieveIDByCourseAndTag(course, null));
                     } else {
-                        ids = dsh.retrieveIDByCourseAndTag(course, om.getAsString().toUpperCase());
+                        ids = new NoteEmbed(dsh.retrieveIDByCourseAndTag(course, om.getAsString().toUpperCase()));
                     }
                     if (ids.isEmpty()) {
                         hook.sendMessage("There are no note IDs that matched your request.").queue();
@@ -246,53 +252,6 @@ public class SlashCommandListener extends ListenerAdapter {
                 event.reply("Note successfully deleted.").queue();
             } else {
                 event.reply("Note could not be deleted!").queue();
-            }
-        }
-
-        if (event.getName().equals("generate_summary_by_id")) {
-            event.deferReply().queue(hook -> {
-                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
-                CompletableFuture.runAsync(() -> {
-                    try {
-                        long id = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
-                        String prompt = Objects.requireNonNull(event.getOption("provided_prompt")).getAsString();
-                        List<byte[]> data = dsh.retrieveBlob(id);
-                        if (data.isEmpty()) {
-                            hook.sendMessage("There is no data associated with id of: " + id).queue();
-                            return;
-                        }
-                        String message = aiSummaryService.generateSummary(prompt, data);
-                        sendMessages(hook.getInteraction().getMessageChannel(), latexConverter.extractLatexFromString(message));
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, "Failed to generate summary.", e);
-                        hook.sendMessage("An error occurred while generating the summary.").queue();
-                    }
-                });
-            });
-        }
-    }
-
-    // Determines whether the Object is a byte[] array or a String
-    // Bypasses Discord's Message.MAX_CONTENT_LENGTH by sending a message in parts
-    private void sendMessages(MessageChannel channel, ArrayList<Object> list) {
-        for (Object object : list) {
-            if (object instanceof byte[]) {
-                try (FileUpload file = FileUpload.fromData((byte[]) object, "file.png")) {
-                    channel.sendFiles(file).queue();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            } else if (object instanceof String) {
-                if (((String) object).length() > Message.MAX_CONTENT_LENGTH) {
-                    do {
-                        String cutMessage = object.toString().substring(0, Message.MAX_CONTENT_LENGTH);
-                        channel.sendMessage(cutMessage).queue();
-                        object = object.toString().substring(cutMessage.length());
-                    } while (((String) object).length() > Message.MAX_CONTENT_LENGTH);
-                }
-                channel.sendMessage(object.toString()).queue();
-            } else {
-                logger.log(Level.WARNING, "There was an object that was not a byte[] array or a String object!", object);
             }
         }
     }

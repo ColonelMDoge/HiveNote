@@ -9,7 +9,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -20,8 +19,8 @@ public class LatexConverter {
 
     // Use RegEx to extract latex expressions from a string
     // returns an arraylist of strings, where a string may contain a normal string or a latex expression.
-    public ArrayList<Object> extractLatexFromString(String string) {
-        ArrayList<Object> result = new ArrayList<>();
+    private String formatLatexFromString(String string) {
+        StringBuilder builder = new StringBuilder();
         Pattern p = Pattern.compile(
                 // Match $$...$$ for display math mode
                 "(?<!\\\\)\\$\\$(.+?)\\$\\$"
@@ -59,24 +58,36 @@ public class LatexConverter {
 
         Matcher m = p.matcher(string);
         int lastIndex = 0;
+
         while (m.find()) {
             if (m.start() > lastIndex) {
-                result.add(string.substring(lastIndex, m.start()));
+                String segment = string.substring(lastIndex, m.start());
+                segment = segment.replace(" ", "~")
+                        .replace(".~", ".\\\\\\\\ ")
+                        .replace(",~", ".\\\\\\\\ ")
+                        .replace("!~", ".\\\\\\\\ ");
+                builder.append(segment);
             }
-            result.add(convertLatexToImage(m.group()));
+            builder.append(m.group()).append("\\\\\\\\");
             lastIndex = m.end();
         }
+
         if (lastIndex < string.length()) {
-            result.add(string.substring(lastIndex));
+            String segment = string.substring(lastIndex);
+            segment = segment.replace(" ", "~")
+                    .replace(".~", ".\\\\\\\\ ")
+                    .replace(",~", ".\\\\\\\\ ")
+                    .replace("!~", ".\\\\\\\\ ");
+            builder.append(segment);
         }
-        return result;
+        return builder.toString();
     }
 
     // Converts given latex expression into a File object
     // Discord bot will attach file and upload it
-    private byte[] convertLatexToImage(String string) {
+    public byte[] convertLatexToImage(String string) {
         try {
-            TeXFormula teXFormula = new TeXFormula(string);
+            TeXFormula teXFormula = new TeXFormula(formatLatexFromString(string));
             TeXIcon teXIcon = teXFormula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 20);
             BufferedImage image = new BufferedImage(teXIcon.getIconWidth(), teXIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
 
