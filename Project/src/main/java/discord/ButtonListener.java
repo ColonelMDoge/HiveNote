@@ -75,6 +75,7 @@ public class ButtonListener extends ListenerAdapter {
         if (event.getComponentId().startsWith("summarize_")) {
             event.deferReply().queue();
             InteractionHook hook = event.getHook();
+
             CompletableFuture.runAsync(() -> {
                 try {
                     String[] parts = event.getComponentId().split("_");
@@ -86,7 +87,10 @@ public class ButtonListener extends ListenerAdapter {
                         return;
                     }
                     String message = ai.generateSummary(attachments.get(page).data());
-                    hook.sendFiles(FileUpload.fromData(latexConverter.convertLatexToImage(message), "File.png")).queue();
+                    Button close = Button.primary("delete", "Close message");
+                    hook.sendFiles(FileUpload.fromData(latexConverter.convertLatexToImage(message), "File.png"))
+                            .setComponents(ActionRow.of(close))
+                            .queue();
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "Failed to summarize page of a note.", e);
                     event.getHook().sendMessage("Something went wrong while summarizing.").queue();

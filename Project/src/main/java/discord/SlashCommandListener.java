@@ -65,7 +65,10 @@ public class SlashCommandListener extends ListenerAdapter {
             );
             try {
                 String returnedMessage = aiSummaryService.generateResponse(Objects.requireNonNull(event.getOption("asked_prompt")).getAsString());
-                event.getHook().sendFiles(FileUpload.fromData(latexConverter.convertLatexToImage(returnedMessage), "File.png")).queue();
+                Button close = Button.primary("delete", "Close message");
+                event.getHook().sendFiles(FileUpload.fromData(latexConverter.convertLatexToImage(returnedMessage), "File.png"))
+                        .setComponents(ActionRow.of(close))
+                        .queue();
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Failed to generate response.", e);
                 event.reply("An error occurred while generating the response.").queue();
