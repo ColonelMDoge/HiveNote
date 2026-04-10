@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it-katex@2.0.3/index.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: white;
+      font-size: 22px;
+      font-family: Arial, sans-serif;
+    }
+    #content {
+      max-width: 1920px;
+    }
+  </style>
+  <title></title>
+</head>
+<body>
+
+<div id="content">
+  Hey there!
+
+The product series symbol is the capital Greek letter **Pi (Π)**.
+
+It works very similarly to the summation symbol (Sigma, Σ), but instead of adding up the terms, you multiply them together.
+
+Here's how it generally looks:
+
+$$\prod_{i=k}^{n} a_i$$
+
+This means you multiply the terms $a_i$ starting from $i=k$ all the way up to $i=n$.
+
+**For example:**
+
+$$\prod_{i=1}^{4} i = 1 \times 2 \times 3 \times 4 = 24$$
+
+Let me know if you have any other math questions!
+</div>
+
+<script>
+  (function () {
+    const md = window.markdownit({ breaks: true });
+    const container = document.getElementById("content");
+    const rawMarkdown = container.textContent;
+    container.innerHTML = md.render(rawMarkdown);
+    renderMathInElement(container, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false }
+      ]
+    });
+    window.__RENDER_DONE__ = true;
+  })();
+</script>
+</body>
+</html>
+

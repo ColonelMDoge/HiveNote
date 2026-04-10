@@ -42,3 +42,6 @@ build/
 
 # Ignore log lock files
 *.lck
+
+# Ignore node_modules
+node_modules/

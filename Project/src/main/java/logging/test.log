@@ -1,7 +1,0 @@
-2026-03-22 15:25:48 [INFO] logging.LoggerUtil.setupLogging: Logging started. 
-2026-03-22 15:25:48 [INFO] database.DatabaseServiceHandler.getPoolDataSource: PoolDataSource created. 
-2026-03-22 15:25:53 [INFO] database.DatabaseServiceHandler.lambda$preLoadData$1: Preloading data complete. 
-2026-03-22 15:25:54 [INFO] database.DatabaseServiceHandler.testConnection: Connected to the HiveNote database. 
-2026-03-22 15:25:56 [INFO] discord.OnReadyListener.onReady: The Discord bot is ready. 
-2026-03-22 15:30:09 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "ask" slash command interaction was received from: colonelmdoge. 
-2026-03-22 15:30:41 [INFO] discord.SlashCommandListener.onSlashCommandInteraction: A(n) "retrieve_note_by_id" slash command interaction was received from: colonelmdoge. 

@@ -88,7 +88,7 @@ public class ButtonListener extends ListenerAdapter {
                     }
                     String message = ai.generateSummary(attachments.get(page).data());
                     Button close = Button.primary("delete", "Close message");
-                    hook.sendFiles(FileUpload.fromData(latexConverter.convertLatexToImage(message), "File.png"))
+                    hook.sendFiles(FileUpload.fromData(latexConverter.convertStringToLatex(message), "File.png"))
                             .setComponents(ActionRow.of(close))
                             .queue();
                 } catch (Exception e) {

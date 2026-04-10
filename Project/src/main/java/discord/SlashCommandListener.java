@@ -66,7 +66,7 @@ public class SlashCommandListener extends ListenerAdapter {
             try {
                 String returnedMessage = aiSummaryService.generateResponse(Objects.requireNonNull(event.getOption("asked_prompt")).getAsString());
                 Button close = Button.primary("delete", "Close message");
-                event.getHook().sendFiles(FileUpload.fromData(latexConverter.convertLatexToImage(returnedMessage), "File.png"))
+                event.getHook().sendFiles(FileUpload.fromData(latexConverter.convertStringToLatex(returnedMessage), "File.png"))
                         .setComponents(ActionRow.of(close))
                         .queue();
             } catch (Exception e) {
