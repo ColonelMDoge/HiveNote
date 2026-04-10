@@ -5,18 +5,21 @@
 2. A Google Gemini API Token. They provide Always Free API Keys. https://ai.google.dev/
 3. A Discord Application API Token. This allows you to create a Discord Bot. https://discord.com/developers/applications
 4. KaTeX and NodeJS via `npm install`
+5. Python3.12 and pip
 ## Instructions:
 1. Set the environment variables of your API keys. The names can be found in the following classes:
   - HiveNoteBot.java
   - database/DatabaseServiceHandler.java
   - discord/OnReadyListener.java
-2. Logs can be viewed in the logging/logs.log file for possible errors
-3. Have fun!
+2. Create a .env in the pinger directory and set the username, password, and connection string 
+3. Logs can be viewed in the logging/logs.log file for possible errors
+4. Have fun!
 ## Features:
 1. LaTeX rendering using NodeJS via a Java ProcessBuilder
 2. Pagination to store multiple files for an individual note ID
 3. Gemini prompting for general questions and to summarize notes
 4. If setup properly, this application can be hosted to run 24/7 without paying a single dollar
+5. Extra utility script to continously ping an Always-Free database to keep it running without shutting down 
 
 Note: The Google API Key must be an environment variable called `GOOGLE_API_KEY`
 ### Massive Note: Continous testing is still required to ensure a bug-free application.
