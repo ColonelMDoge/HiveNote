@@ -11,11 +11,11 @@
   - HiveNoteBot.java
   - database/DatabaseServiceHandler.java
   - discord/OnReadyListener.java
-2. Create a .env in the pinger directory and set the username, password, and connection string 
-3. Logs can be viewed in the logging/logs.log file for possible errors
+2. Create a `.env` in the pinger directory and set the username, password, and connection string 
+3. Logs can be viewed in the `logging/logs.log` file for possible errors
 4. Have fun!
 ## Features:
-1. LaTeX rendering using NodeJS via a Java ProcessBuilder
+1. LaTeX rendering using NodeJS and KaTeX via a Java ProcessBuilder
 2. Pagination to store multiple files for an individual note ID
 3. Gemini prompting for general questions and to summarize notes
 4. If setup properly, this application can be hosted to run 24/7 without paying a single dollar
@@ -25,5 +25,4 @@ Note: The Google API Key must be an environment variable called `GOOGLE_API_KEY`
 ### Massive Note: Continous testing is still required to ensure a bug-free application.
 
 ## Future Add-ons:
-1. Database indices for faster access.
-2. Potential website integration to access notes online instead of from Discord.
+1. Potential website integration to access notes online instead of from Discord.
