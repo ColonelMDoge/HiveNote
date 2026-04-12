@@ -30,7 +30,7 @@ public class LoggerUtil {
     private static FileHandler globalFH;
     public static void setupLogging() {
         try {
-            globalFH = new FileHandler("src/main/java/logging/test.log");
+            globalFH = new FileHandler("src/main/java/logging/logs.log");
             Formatter fmt = new MyFormatter();
             globalFH.setFormatter(fmt);
             globalFH.setLevel(Level.ALL);
