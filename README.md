@@ -11,8 +11,8 @@
   - HiveNoteBot.java
   - database/DatabaseServiceHandler.java
   - discord/OnReadyListener.java
-2. Create a .env in the pinger directory and set the username, password, and connection string 
-3. Logs can be viewed in the logging/logs.log file for possible errors
+2. Create a `.env` in the pinger directory and set the username, password, and connection string 
+3. Logs can be viewed in the `logging/logs.log` file for possible errors
 4. Have fun!
 ## Features:
 1. LaTeX rendering using NodeJS and KaTeX via a Java ProcessBuilder
