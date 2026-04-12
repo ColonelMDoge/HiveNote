@@ -13,7 +13,6 @@ public class LatexConverter {
     // Converts given latex expression into a byte array
     // Discord bot will attach file and upload it
     public byte[] convertStringToLatex(String string) {
-        System.out.println(string);
         String base = "src/main/java/latex";
         ProcessBuilder pb = new ProcessBuilder("node", "render.js");
         pb.directory(Path.of(base, "render.js").toAbsolutePath().getParent().toFile());

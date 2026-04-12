@@ -45,3 +45,7 @@ build/
 
 # Ignore node_modules
 node_modules/
+
+# Ignore output files
+src/main/java/latex/output.html
+src/main/java/latex/equation.png

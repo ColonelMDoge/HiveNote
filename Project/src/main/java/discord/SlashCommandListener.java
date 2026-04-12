@@ -195,8 +195,10 @@ public class SlashCommandListener extends ListenerAdapter {
             embed.addField("Attachment (" + (page + 1) + "/" + attachments.size() + ")",
                     current.fileName(),
                     false);
-            Button prev = Button.primary("note_prev_" + id + "_" + page, Emoji.fromFormatted("⬅"));
-            Button next = Button.primary("note_next_" + id + "_" + page, Emoji.fromFormatted("➡"));
+            Button prev = Button.primary("note_prev_" + id + "_" + page, Emoji.fromFormatted("⬅"))
+                    .withDisabled(page == 0);
+            Button next = Button.primary("note_next_" + id + "_" + page, Emoji.fromFormatted("➡"))
+                    .withDisabled(page == attachments.size() - 1);
             Button gemini = Button.primary("summarize_" + id + "_" + page, "Summarize Using Gemini");
             Button close = Button.primary("delete", "Close message");
             event.getHook().sendMessageEmbeds(embed.build())

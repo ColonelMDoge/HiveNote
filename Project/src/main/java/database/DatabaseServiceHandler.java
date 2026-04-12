@@ -97,6 +97,22 @@ public class DatabaseServiceHandler {
         return false;
     }
 
+    private void executeBatch(String sqlStatement, SQLConsumer<PreparedStatement> consumer) {
+        try (Connection conn = getPoolDataSource().getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement statement = conn.prepareStatement(sqlStatement)) {
+                consumer.accept(statement);
+                statement.executeBatch();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                logger.log(Level.WARNING, "Could not commit batch transaction and thus rolled back", e);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Database batch operation failed", e);
+        }
+    }
+
     public HashMap<String, Set<String>> preLoadData() {
         String statement = """
                 SELECT c.COURSE_CODE, t.TAG_NAME
@@ -275,14 +291,13 @@ public class DatabaseServiceHandler {
             }
         }
 
-        executeUpdate(attachmentStatement, ps -> {
+        executeBatch(attachmentStatement, ps -> {
             for (Attachment attachment : note.ATTACHMENTS()) {
                 ps.setLong(1, noteIDNonNull);
                 ps.setString(2, attachment.fileName());
                 ps.setBytes(3, attachment.data());
                 ps.addBatch();
             }
-            ps.executeBatch();
         });
 
         logger.info("Note successfully uploaded to the database.");
@@ -425,38 +440,29 @@ public class DatabaseServiceHandler {
             if (newCourseCode.getAsStringList().isEmpty()) ps.setNull(4, Types.VARCHAR);
             else ps.setString(4, newCourseCode.getAsStringList().get(0));
             ps.setLong(5, noteID);
-            ps.executeUpdate();
             logger.info("Descriptors successfully updated!");
         });
 
-        if (newAttachments != null && !newAttachments.getAsAttachmentList().isEmpty()) {
-            executeUpdate(deleteAttachmentsSQL, ps -> {
-                ps.setLong(1, noteID);
-                ps.executeUpdate();
-            });
-            executeUpdate(insertAttachmentsSQL, ps -> {
+        if (!newAttachments.getAsAttachmentList().isEmpty()) {
+            executeUpdate(deleteAttachmentsSQL, ps -> ps.setLong(1, noteID));
+            executeBatch(insertAttachmentsSQL, ps -> {
                 for (Message.Attachment a : newAttachments.getAsAttachmentList()) {
                     ps.setLong(1, noteID);
                     ps.setBytes(2, AttachmentConvertor.convertToBytes(a));
                     ps.setString(3, a.getFileName());
                     ps.addBatch();
                 }
-                ps.executeBatch();
-                logger.info("Attachments successfully updated!");
             });
+            logger.info("Attachments successfully updated!");
         }
         if (!newTags.getAsStringList().isEmpty()) {
-            executeUpdate(deleteTagsSQL, ps -> {
-                ps.setLong(1, noteID);
-                ps.executeUpdate();
-            });
-            executeUpdate(insertTagSQL, ps -> {
+            executeUpdate(deleteTagsSQL, ps -> ps.setLong(1, noteID));
+            executeBatch(insertTagSQL, ps -> {
                 for (String tag : newTags.getAsStringList()) {
                     ps.setLong(1, noteID);
                     ps.setString(2, tag);
                     ps.addBatch();
                 }
-                ps.executeBatch();
                 logger.info("Tags successfully updated!");
             });
             logger.info("Note updated successfully.");
@@ -465,9 +471,6 @@ public class DatabaseServiceHandler {
 
     public boolean deleteNote(long noteID) {
         String statement = "DELETE FROM NOTE WHERE NOTE_ID = ?";
-        return executeUpdate(statement, ps -> {
-            ps.setLong(1, noteID);
-            ps.executeUpdate();
-        });
+        return executeUpdate(statement, ps -> ps.setLong(1, noteID));
     }
 }
