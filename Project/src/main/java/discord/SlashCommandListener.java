@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -63,16 +62,11 @@ public class SlashCommandListener extends ListenerAdapter {
             event.reply("Processing your request...").setEphemeral(true).queue(hook ->
                     hook.deleteOriginal().queueAfter(5, TimeUnit.SECONDS)
             );
-            try {
-                String returnedMessage = aiSummaryService.generateResponse(Objects.requireNonNull(event.getOption("asked_prompt")).getAsString());
-                Button close = Button.primary("delete", "Close message");
-                event.getHook().sendFiles(FileUpload.fromData(latexConverter.convertStringToLatex(returnedMessage), "File.png"))
-                        .setComponents(ActionRow.of(close))
-                        .queue();
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Failed to generate response.", e);
-                event.reply("An error occurred while generating the response.").queue();
-            }
+            String returnedMessage = aiSummaryService.generateResponse(Objects.requireNonNull(event.getOption("asked_prompt")).getAsString());
+            Button close = Button.primary("delete", "Close message");
+            event.getHook().sendFiles(FileUpload.fromData(latexConverter.convertStringToLatex(returnedMessage), "File.png"))
+                    .setComponents(ActionRow.of(close))
+                    .queue();
         }
 
         if (event.getName().equals("retrieve_course_codes")) {
@@ -128,9 +122,9 @@ public class SlashCommandListener extends ListenerAdapter {
             String tag = Objects.requireNonNull(event.getOption("deleted_tag")).getAsString().toUpperCase();
             if (dsh.dropTag(course, tag)) {
                 courseToTagLinker.removeTag(course, tag);
-                event.reply("Tag: \"" + tag + "\" has been deleted.").queue();
+                event.reply("Tag: \"" + tag + "\" has been deleted from course: \"" + course + "\".").queue();
             } else {
-                event.reply("Tag: \"" + tag + "\" does not exist in this course, or already exists.").queue();
+                event.reply("Tag: \"" + tag + "\" does not exist in this course.").queue();
             }
         }
 
@@ -196,7 +190,7 @@ public class SlashCommandListener extends ListenerAdapter {
                     current.fileName(),
                     false);
             Button prev = Button.primary("note_prev_" + id + "_" + page, Emoji.fromFormatted("⬅"))
-                    .withDisabled(page == 0);
+                    .withDisabled(true);
             Button next = Button.primary("note_next_" + id + "_" + page, Emoji.fromFormatted("➡"))
                     .withDisabled(page == attachments.size() - 1);
             Button gemini = Button.primary("summarize_" + id + "_" + page, "Summarize Using Gemini");

@@ -65,7 +65,7 @@ public class ModalListener extends ListenerAdapter {
             ModalMapping title = event.getValue("title");
             ModalMapping summary = event.getValue("summary");
             ModalMapping tags = event.getValue(course + "_tags");
-            dsh.updateNote(noteID, courses, attachments, title, summary, tags);
+            dsh.updateNote(noteID, courses, Objects.requireNonNull(attachments), title, summary, tags);
             event.getHook().sendMessage("Note successfully updated.").queue();
         }
     }

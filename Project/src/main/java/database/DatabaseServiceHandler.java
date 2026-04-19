@@ -182,16 +182,18 @@ public class DatabaseServiceHandler {
 
     public boolean dropTag(String course, String tag) {
         String statement = """
-                DELETE t FROM TAG t
-                JOIN COURSE course ON course.COURSE_ID = t.COURSE_ID
-                WHERE t.TAG_NAME = ? AND  course.COURSE_CODE = ?
+                DELETE FROM TAG WHERE TAG_ID = (
+                    SELECT t.TAG_ID FROM TAG t
+                    JOIN COURSE c ON c.COURSE_ID = t.COURSE_ID
+                    WHERE t.TAG_NAME = ? AND c.COURSE_CODE = ?
+                )
                 """;
         boolean update = executeUpdate(statement, ps -> {
             ps.setString(1, tag.toUpperCase());
             ps.setString(2, course.toUpperCase());
         });
         if (update) {
-            logger.info(String.format("Dropped tag: %s from the database", tag.toUpperCase()));
+            logger.info(String.format("Dropped tag: %s from course: %s", tag.toUpperCase(), course.toUpperCase()));
             return true;
         }
         return false;
@@ -204,9 +206,11 @@ public class DatabaseServiceHandler {
                 WHERE n.NOTE_ID = ?
                 """;
         return executeQuery(statement, ps -> {
-            ps.setLong(1, noteID);      // set the parameter
-            try (ResultSet rs = ps.executeQuery()) {  // execute query
-                if (rs.next()) return rs.getString(1);
+            ps.setLong(1, noteID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString(1);
+                }
                 return null;
             }
         });
@@ -306,7 +310,7 @@ public class DatabaseServiceHandler {
 
     public List<Attachment> retrieveBlobs(long noteID) {
         String attachmentStatement = """
-                SELECT FILE_NAME, FILE_BLOB FROM ATTACHMENT WHERE NOTE_ID = ? ORDER BY FILE_NAME
+                SELECT FILE_NAME, FILE_BLOB FROM ATTACHMENT WHERE NOTE_ID = ?
                 """;
         return executeQuery(attachmentStatement, ps -> {
             ps.setLong(1, noteID);

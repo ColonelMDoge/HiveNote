@@ -24,7 +24,9 @@ public class AISummaryService {
         GenerateContentResponse response;
         try (Client client = new Client()) {
             response = client.models.generateContent(MODEL_NAME, prompt, config);
-            return response.text();
+            String text = response.text();
+            if (text == null || text.isEmpty()) return "Failed to generate a response. Please try again later.";
+            return text;
         } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to generate a response!", e);
         }
@@ -37,7 +39,9 @@ public class AISummaryService {
             content.parts(Part.fromText("Summarize this:"));
             content.parts(Part.fromBytes(data, URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(data))));
             response = client.models.generateContent(MODEL_NAME, content.build(), config);
-            return response.text();
+            String text = response.text();
+            if (text == null || text.isEmpty()) return "Failed to generate a response. Please try again later.";
+            return text;
         } catch (IOException e) {
             logger.log(Level.WARNING, "Failed to generate a summary!", e);
         }

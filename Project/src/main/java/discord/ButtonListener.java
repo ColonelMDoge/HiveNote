@@ -18,7 +18,6 @@ import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ButtonListener extends ListenerAdapter {
@@ -34,6 +33,7 @@ public class ButtonListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
+        logger.info(String.format("A button interaction was received from: %s.", event.getUser().getName()));
         if (event.getComponentId().startsWith("note_")) {
             String[] parts = event.getComponentId().split("_");
 
@@ -77,24 +77,19 @@ public class ButtonListener extends ListenerAdapter {
             InteractionHook hook = event.getHook();
 
             CompletableFuture.runAsync(() -> {
-                try {
-                    String[] parts = event.getComponentId().split("_");
-                    long noteID = Long.parseLong(parts[1]);
-                    int page = Integer.parseInt(parts[2]);
-                    List<Attachment> attachments = dsh.retrieveBlobs(noteID);
-                    if (attachments.isEmpty()) {
-                        hook.sendMessage("There is no data associated with id of: " + noteID).queue();
-                        return;
-                    }
-                    String message = ai.generateSummary(attachments.get(page).data());
-                    Button close = Button.primary("delete", "Close message");
-                    hook.sendFiles(FileUpload.fromData(latexConverter.convertStringToLatex(message), "File.png"))
-                            .setComponents(ActionRow.of(close))
-                            .queue();
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, "Failed to summarize page of a note.", e);
-                    event.getHook().sendMessage("Something went wrong while summarizing.").queue();
+                String[] parts = event.getComponentId().split("_");
+                long noteID = Long.parseLong(parts[1]);
+                int page = Integer.parseInt(parts[2]);
+                List<Attachment> attachments = dsh.retrieveBlobs(noteID);
+                if (attachments.isEmpty()) {
+                    hook.sendMessage("There is no data associated with id of: " + noteID).queue();
+                    return;
                 }
+                String message = ai.generateSummary(attachments.get(page).data());
+                Button close = Button.primary("delete", "Close message");
+                hook.sendFiles(FileUpload.fromData(latexConverter.convertStringToLatex(message), "File.png"))
+                        .setComponents(ActionRow.of(close))
+                        .queue();
             });
         }
     }
