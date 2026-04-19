@@ -1,4 +1,8 @@
 # HiveNote: A Java Discord and Gemini Wrapper to Store Notes
+<p align="center">
+  <img width="256" height="256" alt="HiveNotePFP" src="https://github.com/user-attachments/assets/605b41fb-e679-44f1-9b40-f69a91d78f87" />
+</p>
+
 >  ### HiveNote serves to store organized notes. People will be able to upload and retrieve their notes to and from a single database. Google Gemini will be used to summarize notes. All outputs will be formatted through LaTeX.
 ## Prerequisites:
 1. A working Oracle Cloud Infrastructure ATP Database. Here is a tutorial on how to create one: https://amysimpsongrange.com/2023/01/23/creating-an-atp-database-in-oracle-cloud/
@@ -22,7 +26,6 @@
 5. Extra utility script to continously ping an Always-Free database to keep it running without shutting down 
 
 Note: The Google API Key must be an environment variable called `GOOGLE_API_KEY`
-### Massive Note: Continous testing is still required to ensure a bug-free application.
 
 ## Future Add-ons:
 1. Potential website integration to access notes online instead of from Discord.
