@@ -27,14 +27,26 @@ public class LoggerUtil {
         public static void resetFinally() { instance.reset0(); }
     }
 
-    private static FileHandler globalFH;
     public static void setupLogging() {
         try {
-            globalFH = new FileHandler("src/main/java/logging/logs.log");
+            FileHandler globalFH = new FileHandler("src/main/java/logging/logs.log");
             Formatter fmt = new MyFormatter();
             globalFH.setFormatter(fmt);
             globalFH.setLevel(Level.ALL);
+
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            consoleHandler.setFormatter(fmt);
+            consoleHandler.setLevel(Level.ALL);
+
             Logger logger = LoggerUtil.getLogger(LoggerUtil.class);
+            logger.setLevel(Level.ALL);
+
+            for (Handler h : logger.getHandlers()) {
+                logger.removeHandler(h);
+            }
+
+            logger.addHandler(globalFH);
+            logger.addHandler(consoleHandler);
             logger.info("Logging started.");
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -42,10 +54,6 @@ public class LoggerUtil {
     }
 
     public static Logger getLogger(Class<?> providedClass) {
-        Logger logger = Logger.getLogger(providedClass.getName());
-        logger.setLevel(Level.ALL);
-        logger.setUseParentHandlers(false);
-        logger.addHandler(globalFH);
-        return logger;
+        return Logger.getLogger(providedClass.getName());
     }
 }
