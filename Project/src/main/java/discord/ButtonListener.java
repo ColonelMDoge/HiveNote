@@ -73,7 +73,7 @@ public class ButtonListener extends ListenerAdapter {
             event.getHook().deleteOriginal().queue();
         }
         if (event.getComponentId().startsWith("summarize_")) {
-            event.deferReply().queue();
+            event.deferReply(true).queue();
             InteractionHook hook = event.getHook();
 
             CompletableFuture.runAsync(() -> {
@@ -82,7 +82,7 @@ public class ButtonListener extends ListenerAdapter {
                 int page = Integer.parseInt(parts[2]);
                 List<Attachment> attachments = dsh.retrieveBlobs(noteID);
                 if (attachments.isEmpty()) {
-                    hook.sendMessage("There is no data associated with id of: " + noteID).queue();
+                    hook.sendMessage("There is no data associated with id of: " + noteID).setEphemeral(true).queue();
                     return;
                 }
                 String message = ai.generateSummary(attachments.get(page).data());

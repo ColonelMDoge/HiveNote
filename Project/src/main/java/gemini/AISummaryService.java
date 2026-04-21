@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 public class AISummaryService {
     private final Logger logger = LoggerUtil.getLogger(AISummaryService.class);
-    final String MODEL_NAME = "gemini-2.5-flash";
+    final String MODEL_NAME = "gemini-2.5-flash-lite";
     final String SYSTEM_INSTRUCTION = "You are a Discord Bot named HiveNote.";
     final GenerateContentConfig config = GenerateContentConfig
             .builder()

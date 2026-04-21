@@ -55,7 +55,7 @@ public class SlashCommandListener extends ListenerAdapter {
         logger.info(String.format("A(n) \"%s\" slash command interaction was received from: %s.", event.getName(), event.getUser().getName()));
 
         if (event.getName().equals("help")) {
-            event.replyEmbeds(embedBuilder.build()).queue();
+            event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
         }
 
         if (event.getName().equals("ask")) {
@@ -66,6 +66,7 @@ public class SlashCommandListener extends ListenerAdapter {
             Button close = Button.primary("delete", "Close message");
             event.getHook().sendFiles(FileUpload.fromData(latexConverter.convertStringToLatex(returnedMessage), "File.png"))
                     .setComponents(ActionRow.of(close))
+                    .setEphemeral(true)
                     .queue();
         }
 
@@ -75,24 +76,24 @@ public class SlashCommandListener extends ListenerAdapter {
             embed.setColor(new Color(235, 171, 0));
             StringBuilder sb = new StringBuilder();
             if (courseToTagLinker.getCoursesAsSet().isEmpty()) {
-                event.reply("There are no course codes yet.").queue();
+                event.reply("There are no course codes yet.").setEphemeral(true).queue();
                 return;
             }
             courseToTagLinker.getCoursesAsSet().stream().sorted().forEach(
                     course -> sb.append("``").append(course).append("``").append("\n"));
             embed.addField("Available courses:", sb.toString(), true);
-            event.replyEmbeds(embed.build()).queue();
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
         }
 
         if (event.getName().equals("retrieve_tags_by_course")){
             String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString().toUpperCase();
             if (courseToTagLinker.courseCodeDNE(course)) {
-                event.reply("Provided course code does not exist.").queue();
+                event.reply("Provided course code does not exist.").setEphemeral(true).queue();
                 return;
             }
 
             if (courseToTagLinker.getTagsAsSet(course).isEmpty()) {
-                event.reply("Provided course code has no tags yet.").queue();
+                event.reply("Provided course code has no tags yet.").setEphemeral(true).queue();
                 return;
             }
 
@@ -103,7 +104,7 @@ public class SlashCommandListener extends ListenerAdapter {
             courseToTagLinker.getTagsAsSet(course).stream().sorted().forEach(
                     tag -> sb.append("``").append(tag).append("``").append("\n"));
             embed.addField("Available tags relating to the provided course:", sb.toString(), true);
-            event.replyEmbeds(embed.build()).queue();
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
         }
 
         if (event.getName().equals("create_tag")) {
@@ -111,9 +112,9 @@ public class SlashCommandListener extends ListenerAdapter {
             String tag = Objects.requireNonNull(event.getOption("created_tag")).getAsString().toUpperCase();
             if (dsh.insertTag(course, tag)) {
                 courseToTagLinker.addTag(course, tag);
-                event.reply("Tag: \"" + tag + "\" has been created in course: \"" + course + "\".").queue();
+                event.reply("Tag: \"" + tag + "\" has been created in course: \"" + course + "\".").setEphemeral(true).queue();
             } else {
-                event.reply("Tag: \"" + tag + "\" does not exist in this course, or already exists.").queue();
+                event.reply("Tag: \"" + tag + "\" already exists.").setEphemeral(true).queue();
             }
         }
 
@@ -122,9 +123,9 @@ public class SlashCommandListener extends ListenerAdapter {
             String tag = Objects.requireNonNull(event.getOption("deleted_tag")).getAsString().toUpperCase();
             if (dsh.dropTag(course, tag)) {
                 courseToTagLinker.removeTag(course, tag);
-                event.reply("Tag: \"" + tag + "\" has been deleted from course: \"" + course + "\".").queue();
+                event.reply("Tag: \"" + tag + "\" has been deleted from course: \"" + course + "\".").setEphemeral(true).queue();
             } else {
-                event.reply("Tag: \"" + tag + "\" does not exist in this course.").queue();
+                event.reply("Tag: \"" + tag + "\" does not exist in this course.").setEphemeral(true).queue();
             }
         }
 
@@ -133,9 +134,9 @@ public class SlashCommandListener extends ListenerAdapter {
             String name = Objects.requireNonNull(event.getOption("provided_name")).getAsString();
             if (dsh.insertCourse(course, name)) {
                 courseToTagLinker.addCourseCode(course);
-                event.reply("Course: \"" + course + "\" has been created.").queue();
+                event.reply("Course: \"" + course + "\" has been created.").setEphemeral(true).queue();
             } else {
-                event.reply("Tag: \"" + course + "\" already exists.").queue();
+                event.reply("Tag: \"" + course + "\" already exists.").setEphemeral(true).queue();
             }
         }
 
@@ -143,24 +144,24 @@ public class SlashCommandListener extends ListenerAdapter {
             String course = Objects.requireNonNull(event.getOption("deleted_course")).getAsString().toUpperCase();
             if (dsh.dropCourse(course)) {
                 courseToTagLinker.removeCourseCode(course);
-                event.reply("Course: \"" + course + "\" and its associated tags has been deleted.").queue();
+                event.reply("Course: \"" + course + "\" and its associated tags has been deleted.").setEphemeral(true).queue();
             } else {
-                event.reply("Course: \"" + course + "\" does not exist.").queue();
+                event.reply("Course: \"" + course + "\" does not exist.").setEphemeral(true).queue();
             }
         }
 
         if (event.getName().equals("upload_note")) {
             String course = Objects.requireNonNull(event.getOption("asked_course")).getAsString().toUpperCase();
             if (courseToTagLinker.getCoursesAsSet().isEmpty()) {
-                event.reply("There are no existing courses yet.").queue();
+                event.reply("There are no existing courses yet.").setEphemeral(true).queue();
                 return;
             }
             if (courseToTagLinker.courseCodeDNE(course)) {
-                event.reply("Your provided course code does not exist.").queue();
+                event.reply("Your provided course code does not exist.").setEphemeral(true).queue();
                 return;
             }
             if (courseToTagLinker.tagsDNE(course)) {
-                event.reply("There are no associated tags with this course yet.").queue();
+                event.reply("There are no associated tags with this course yet.").setEphemeral(true).queue();
                 return;
             }
 
@@ -175,12 +176,12 @@ public class SlashCommandListener extends ListenerAdapter {
         }
 
         if (event.getName().equals("retrieve_note_by_id")) {
-            event.deferReply().queue();
+            event.deferReply(true).queue();
             long id = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
             int page = 0;
             Note note = dsh.retrieveByNoteID(id);
             if (note == null) {
-                event.getHook().sendMessage("There is no note associated with id of: " + id + ".").queue();
+                event.getHook().sendMessage("There is no note associated with id of: " + id + ".").setEphemeral(true).queue();
                 return;
             }
             NoteEmbed embed = new NoteEmbed(note, jda);
@@ -203,7 +204,7 @@ public class SlashCommandListener extends ListenerAdapter {
 
         if(event.getName().equals("retrieve_ids_by_filter")) {
             event.deferReply().queue(hook -> {
-                hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
+                hook.sendMessage("Processing your request...").setEphemeral(true).queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS));
                 CompletableFuture.runAsync(() -> {
                     EmbedBuilder ids;
                     String course = Objects.requireNonNull(event.getOption("provided_course")).getAsString().toUpperCase();
@@ -214,10 +215,10 @@ public class SlashCommandListener extends ListenerAdapter {
                         ids = new NoteEmbed(dsh.retrieveIDByCourseAndTag(course, om.getAsString().toUpperCase()));
                     }
                     if (ids.isEmpty()) {
-                        hook.sendMessage("There are no note IDs that matched your request.").queue();
+                        hook.sendMessage("There are no note IDs that matched your request.").setEphemeral(true).queue();
                         return;
                     }
-                    hook.sendMessageEmbeds(ids.build()).queue();
+                    hook.sendMessageEmbeds(ids.build()).setEphemeral(true).queue();
                 });
             });
         }
@@ -226,7 +227,7 @@ public class SlashCommandListener extends ListenerAdapter {
             long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
             String course = dsh.retrieveCourseCodeById(noteID);
             if (course == null) {
-                event.reply("No note exists with provided ID.").queue();
+                event.reply("No note exists with provided ID.").setEphemeral(true).queue();
                 return;
             }
             Modal modifyModal = Modal.create("modify_modal:" + course + ":" + noteID, "Modify Note Details")
@@ -244,13 +245,13 @@ public class SlashCommandListener extends ListenerAdapter {
         if (event.getName().equals("delete_note")) {
             long noteID = Objects.requireNonNull(event.getOption("provided_id")).getAsLong();
             if (dsh.retrieveByNoteID(noteID) == null) {
-                event.reply("There is no note with the associated ID of: " + noteID).queue();
+                event.reply("There is no note with the associated ID of: " + noteID).setEphemeral(true).queue();
                 return;
             }
             if (dsh.deleteNote(noteID)) {
-                event.reply("Note successfully deleted.").queue();
+                event.reply("Note successfully deleted.").setEphemeral(true).queue();
             } else {
-                event.reply("Note could not be deleted!").queue();
+                event.reply("Note could not be deleted!").setEphemeral(true).queue();
             }
         }
     }
