@@ -64,10 +64,15 @@ public class SlashCommandListener extends ListenerAdapter {
             );
             String returnedMessage = aiSummaryService.generateResponse(Objects.requireNonNull(event.getOption("asked_prompt")).getAsString());
             Button close = Button.primary("delete", "Close message");
-            event.getHook().sendFiles(FileUpload.fromData(latexConverter.convertStringToLatex(returnedMessage), "File.png"))
-                    .setComponents(ActionRow.of(close))
-                    .setEphemeral(true)
-                    .queue();
+            byte[] data = latexConverter.convertStringToLatex(returnedMessage);
+            if (data == null || returnedMessage == null) {
+                event.getHook().sendMessage("Was not able to generate a response. Please try again later.").setEphemeral(true).queue();
+            } else {
+                event.getHook().sendFiles(FileUpload.fromData(data, "File.png"))
+                        .setComponents(ActionRow.of(close))
+                        .setEphemeral(true)
+                        .queue();
+            }
         }
 
         if (event.getName().equals("retrieve_course_codes")) {
