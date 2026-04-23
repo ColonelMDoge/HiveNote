@@ -1,3 +1,4 @@
+/*
 const puppeteer = require("puppeteer");
 
 (async () => {
@@ -18,11 +19,12 @@ const puppeteer = require("puppeteer");
 
     await browser.close();
 })();
+*/
 
 /*
-
 PLAYWRIGHT ALTERNATIVE FOR ARM-BASED CPU
 ** Requires the playwright module and its dependencies **
+*/
 
 const { chromium } = require("playwright");
 
@@ -44,4 +46,3 @@ const { chromium } = require("playwright");
 
     await browser.close();
 })();
-*/

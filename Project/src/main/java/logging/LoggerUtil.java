@@ -4,6 +4,20 @@ import java.io.IOException;
 import java.util.logging.*;
 
 public class LoggerUtil {
+
+
+    private static class FlushFileHandler extends FileHandler {
+        public FlushFileHandler(String pattern, boolean append) throws IOException {
+            super(pattern, append);
+        }
+
+        @Override
+        public synchronized void publish(LogRecord record) {
+            super.publish(record);
+            flush();
+        }
+    }
+
     private static class MyFormatter extends Formatter {
         @Override
         public String format(LogRecord record) {
@@ -27,9 +41,10 @@ public class LoggerUtil {
         public static void resetFinally() { instance.reset0(); }
     }
 
+    private static FileHandler globalFH;
     public static void setupLogging() {
         try {
-            FileHandler globalFH = new FileHandler("src/main/java/logging/logs.log");
+            globalFH = new FlushFileHandler("src/main/java/logging/latest.log", false);
             Formatter fmt = new MyFormatter();
             globalFH.setFormatter(fmt);
             globalFH.setLevel(Level.ALL);
@@ -54,6 +69,10 @@ public class LoggerUtil {
     }
 
     public static Logger getLogger(Class<?> providedClass) {
-        return Logger.getLogger(providedClass.getName());
+        Logger logger = Logger.getLogger(providedClass.getName());
+        logger.setLevel(Level.ALL);
+        logger.setUseParentHandlers(false);
+        logger.addHandler(globalFH);
+        return logger;
     }
 }
