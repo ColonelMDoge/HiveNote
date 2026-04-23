@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+// Converts Discord Attachments to a byte array to be used by the DatabaseServiceHandler class
 public class AttachmentConvertor {
     private static final Logger logger = LoggerUtil.getLogger(AttachmentConvertor.class);
     public static byte[] convertToBytes(Message.Attachment attachment) {

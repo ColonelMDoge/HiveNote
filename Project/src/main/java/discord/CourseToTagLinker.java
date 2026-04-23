@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+// Preloads stored courses and tags for faster retrieval than constant DB querying
 public class CourseToTagLinker implements Serializable {
     private final HashMap<String, Set<String>> courseToTag;
 

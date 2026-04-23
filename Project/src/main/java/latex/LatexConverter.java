@@ -23,6 +23,9 @@ public class LatexConverter {
             Files.writeString(Path.of(base, "output.html"), html);
 
             process = pb.start();
+            String stdout = new String(process.getInputStream().readAllBytes());
+            String stderr = new String(process.getErrorStream().readAllBytes());
+
             int exitCode = process.waitFor();
 
             if (exitCode == 0) {
@@ -30,7 +33,10 @@ public class LatexConverter {
                 return Files.readAllBytes(path);
             } else {
                 logger.log(Level.WARNING,"render.js failed with code: " + exitCode);
+                logger.warning("[render.js stdout:] " + stdout);
+                logger.warning("[render.js stderr:] " + stderr);
             }
+
         } catch (IOException | InterruptedException e) {
             logger.log(Level.SEVERE, "Error converting latex to image", e);
         }

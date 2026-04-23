@@ -18,7 +18,6 @@ public class HiveNoteBot {
     private static final OnReadyListener onReadyListener = new OnReadyListener(slashCommandListener, buttonListener);
     public static void main(String[] args) {
         final String TOKEN = System.getenv("JDA_TOKEN");
-        System.setProperty("java.util.logging.manager", LoggerUtil.MyLogManager.class.getName());
         JDABuilder jdaBuilder = JDABuilder.createDefault(TOKEN);
         JDALogger.setFallbackLoggerEnabled(false);
 

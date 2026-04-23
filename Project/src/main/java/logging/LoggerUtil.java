@@ -5,6 +5,7 @@ import java.util.logging.*;
 
 public class LoggerUtil {
 
+    private static FileHandler fileHandler;
 
     private static class FlushFileHandler extends FileHandler {
         public FlushFileHandler(String pattern, boolean append) throws IOException {
@@ -22,57 +23,49 @@ public class LoggerUtil {
         @Override
         public String format(LogRecord record) {
             return String.format(
-                    "%1$tF %1$tT [%2$s] %3$s.%4$s: %5$s %6$s%n",
+                    "%1$tF %1$tT [%2$s] %3$s: %4$s%n",
                     record.getMillis(),
                     record.getLevel(),
-                    record.getSourceClassName(),
-                    record.getSourceMethodName(),
-                    formatMessage(record),
-                    (record.getThrown() != null ? record.getThrown() : "")
+                    record.getLoggerName(),
+                    formatMessage(record)
             );
         }
     }
 
-    public static class MyLogManager extends LogManager {
-        static MyLogManager instance;
-        public MyLogManager() { instance = this; }
-        @Override public void reset() {}
-        private void reset0() { super.reset(); }
-        public static void resetFinally() { instance.reset0(); }
-    }
-
-    private static FileHandler globalFH;
     public static void setupLogging() {
         try {
-            globalFH = new FlushFileHandler("src/main/java/logging/latest.log", false);
-            Formatter fmt = new MyFormatter();
-            globalFH.setFormatter(fmt);
-            globalFH.setLevel(Level.ALL);
+            fileHandler = new FlushFileHandler("src/main/java/logging/latest.log", false);
+            fileHandler.setFormatter(new MyFormatter());
+            fileHandler.setLevel(Level.INFO);
 
             ConsoleHandler consoleHandler = new ConsoleHandler();
-            consoleHandler.setFormatter(fmt);
-            consoleHandler.setLevel(Level.ALL);
+            consoleHandler.setFormatter(new MyFormatter());
+            consoleHandler.setLevel(Level.INFO);
 
-            Logger logger = LoggerUtil.getLogger(LoggerUtil.class);
-            logger.setLevel(Level.ALL);
+            Logger root = Logger.getLogger("");
+            root.setLevel(Level.INFO);
 
-            for (Handler h : logger.getHandlers()) {
-                logger.removeHandler(h);
+            for (Handler h : root.getHandlers()) {
+                root.removeHandler(h);
             }
 
-            logger.addHandler(globalFH);
-            logger.addHandler(consoleHandler);
-            logger.info("Logging started.");
+            root.addHandler(fileHandler);
+            root.addHandler(consoleHandler);
+            root.info("Logging started.");
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    fileHandler.flush();
+                    fileHandler.close();
+                } catch (Exception ignored) {}
+            }));
+
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to initialize logging!", e);
         }
     }
 
-    public static Logger getLogger(Class<?> providedClass) {
-        Logger logger = Logger.getLogger(providedClass.getName());
-        logger.setLevel(Level.ALL);
-        logger.setUseParentHandlers(false);
-        logger.addHandler(globalFH);
-        return logger;
+    public static Logger getLogger(Class<?> clazz) {
+        return Logger.getLogger(clazz.getName());
     }
 }

@@ -14,6 +14,9 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import oracle.ucp.jdbc.PoolDataSourceFactory;
 import oracle.ucp.jdbc.PoolDataSource;
 
+// Heart of the application.
+// Contains all the methods to interact with the Oracle Autonomous Transaction Processing Database
+// Uses Consumer and Function to reduce try-with-resources statements
 public class DatabaseServiceHandler {
 
     @FunctionalInterface

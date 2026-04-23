@@ -20,6 +20,8 @@ public class AISummaryService {
             .builder()
             .systemInstruction(Content.fromParts(Part.fromText(SYSTEM_INSTRUCTION)))
             .build();
+
+    // Used for the /ask command
     public String generateResponse(String prompt) {
         GenerateContentResponse response;
         try (Client client = new Client()) {
@@ -30,6 +32,8 @@ public class AISummaryService {
         }
         return null;
     }
+
+    // Used to summarize notes
     public String generateSummary(byte[] data) {
         try (Client client = new Client()) {
             String mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(data));

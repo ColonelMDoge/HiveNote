@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
+// Buttons for the retrieved notes
 public class ButtonListener extends ListenerAdapter {
     private final DatabaseServiceHandler dsh = new DatabaseServiceHandler();
     private final AISummaryService ai = new AISummaryService();
