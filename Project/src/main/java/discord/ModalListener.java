@@ -47,16 +47,16 @@ public class ModalListener extends ListenerAdapter {
                 logger.info("Note has been successfully created.");
                 long retrievedID = dsh.uploadToDB(note);
                 if (retrievedID != -1) {
-                    event.getHook().sendMessage("Note successfully uploaded to the database with an ID of: " + retrievedID + ".").queue();
+                    event.getHook().sendMessage("Note successfully uploaded to the database with an ID of: " + retrievedID + ".").setEphemeral(true).queue();
                 } else {
-                    event.getHook().sendMessage("There was a problem uploading the note!").queue();
+                    event.getHook().sendMessage("There was a problem uploading the note!").setEphemeral(true).queue();
                 }
             } catch (NullPointerException e) {
                 logger.log(Level.SEVERE, "Error with the file", e);
             }
         }
         if (event.getModalId().startsWith("modify_modal:")) {
-            event.deferReply().queue(hook -> hook.sendMessage("Processing your request...").queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS)));
+            event.deferReply().queue(hook -> hook.sendMessage("Processing your request...").setEphemeral(true).queue(success -> success.delete().queueAfter(5, TimeUnit.SECONDS)));
 
             logger.info("Modify modal event has been triggered.");
             long noteID = Long.parseLong(event.getModalId().split(":")[2]);
@@ -66,7 +66,7 @@ public class ModalListener extends ListenerAdapter {
             ModalMapping summary = event.getValue("summary");
             ModalMapping tags = event.getValue(course + "_tags");
             dsh.updateNote(noteID, courses, Objects.requireNonNull(attachments), title, summary, tags);
-            event.getHook().sendMessage("Note successfully updated.").queue();
+            event.getHook().sendMessage("Note successfully updated.").setEphemeral(true).queue();
         }
     }
 }

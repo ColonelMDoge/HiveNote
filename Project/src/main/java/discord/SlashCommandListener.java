@@ -119,7 +119,7 @@ public class SlashCommandListener extends ListenerAdapter {
                 courseToTagLinker.addTag(course, tag);
                 event.reply("Tag: \"" + tag + "\" has been created in course: \"" + course + "\".").setEphemeral(true).queue();
             } else {
-                event.reply("Tag: \"" + tag + "\" already exists.").setEphemeral(true).queue();
+                event.reply("Tag: \"" + tag + "\" already exists, or the provided course does not exist yet.").setEphemeral(true).queue();
             }
         }
 
@@ -130,7 +130,7 @@ public class SlashCommandListener extends ListenerAdapter {
                 courseToTagLinker.removeTag(course, tag);
                 event.reply("Tag: \"" + tag + "\" has been deleted from course: \"" + course + "\".").setEphemeral(true).queue();
             } else {
-                event.reply("Tag: \"" + tag + "\" does not exist in this course.").setEphemeral(true).queue();
+                event.reply("Tag: \"" + tag + "\" does not exist in this course, or the provided course does not exist yet.").setEphemeral(true).queue();
             }
         }
 
